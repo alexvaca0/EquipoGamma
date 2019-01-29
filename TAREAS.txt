@@ -1,7 +1,7 @@
 En este documento podemos ir metiendo las tareas que faltan por hacer y justo debajo las que ya están realizadas; y debajo de eso podemos meter un nuevo apartado en el que estén las cosas que ya están hechas y además están revisadas por los otros dos integrantes del grupo. Si no os gusta hacerlo en un txt y preferís que subamos una Hoja de Cálculo de Excel, lo hacemos sin problema; lo que más os guste :)
 
 ---------------------------------------------------------------	TAREAS PENDIENTES -----------------------------------------------------------------------------------------
-1. Estudio descriptivo de las variables (distribuciones, datos ausentes, otras cosillas de interés), con visualización. 
+1. Estudio descriptivo de las variables (distribuciones, datos ausentes, otras cosillas de interés), con visualización. Añadir siempre al estudio de cada variable el estudio de la relación de esa variable con la variable objetivo. 
 	Se puede dividir en partes; id metiendo un párrafo aquí abajo tipo:
 		-- Alex: Análisis Descriptivo (Exploratorio) de vars 1-15. Archivo: anal_expl_01.R
 
