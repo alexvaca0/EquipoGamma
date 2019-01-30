@@ -15,7 +15,7 @@ En este documento podemos ir metiendo las tareas que faltan por hacer y justo de
 2a. Procesamiento de la imagen en formato matriz completa. 
 2b. Procesamiento de la imagen en formato PCA (y otras técnicas de reducción de la dimensión); todos los posibles para probar modelos de todo tipo. 
 
-3.
+3. Comerle la polla a alex a dos manos. 
 4.
 5.
 6.
