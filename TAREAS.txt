@@ -1,7 +1,8 @@
 En este documento podemos ir metiendo las tareas que faltan por hacer y justo debajo las que ya están realizadas; y debajo de eso podemos meter un nuevo apartado en el que estén las cosas que ya están hechas y además están revisadas por los otros dos integrantes del grupo. Si no os gusta hacerlo en un txt y preferís que subamos una Hoja de Cálculo de Excel, lo hacemos sin problema; lo que más os guste :)
 
 ---------------------------------------------------------------	TAREAS PENDIENTES -----------------------------------------------------------------------------------------
-1. Estudio descriptivo de las variables (distribuciones, datos ausentes, otras cosillas de interés), con visualización. Añadir siempre al estudio de cada variable el estudio de la relación de esa variable con la variable objetivo. 
+1. Estudio descriptivo de las variables (distribuciones, datos ausentes, otras cosillas de interés), con visualización. Añadir siempre al estudio de cada variable el estudio de la relación de esa variable con la variable objetivo.
+ 
 	Se puede dividir en partes; id metiendo un párrafo aquí abajo tipo:
 		-- Alex: Análisis Descriptivo (Exploratorio) de vars 1-15. Archivo: anal_expl_01.R
 
@@ -15,8 +16,25 @@ En este documento podemos ir metiendo las tareas que faltan por hacer y justo de
 2a. Procesamiento de la imagen en formato matriz completa. 
 2b. Procesamiento de la imagen en formato PCA (y otras técnicas de reducción de la dimensión); todos los posibles para probar modelos de todo tipo. 
 
-3.  
-4.
+3.  Diseño de Bucle para probar diferentes modelos con CARET, de tal forma que podamos tener una idea preliminar ---- Alex
+
+	Timeline:
+		Fecha límite para la finalización de esta tarea: 02-02-2019
+		Avance a fecha 01-02-2019:
+			--
+			--
+			--
+4.  Comprobar cómo implementar la API de Google Vision sobre nuestras imágenes y, de forma automática, guardar diferentes variables obtenidas de esas imágenes. 
+
+	Objetivo: llamar a la API de Google con nuestras 7000 imágenes (tenemos que pensar en la forma de superar los límites que nos impone la API, primero dividiendo en 3 ese set de 		imágenes, luego llevando un seguimiento exhaustivo de qué imágenes están ya analizadas, y seguramnete pidiendo a alguien que se meta ahí también para poder tirar peticiones 	
+		desde muchas "keys", para no superar los límites que nos impone Google). De ahí sacaríamos variables escondidas en las fotos, las cuales introduciríamos como variables 		predictivas en el train (y test). 
+
+	Timeline:
+		Fecha límite para la finalización de esta tarea: 05-02-2019.
+		Avance a fecha 01-02-2019:
+			--
+			--
+			--
 5.
 6.
 7.
