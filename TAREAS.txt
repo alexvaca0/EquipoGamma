@@ -4,7 +4,7 @@ En este documento podemos ir metiendo las tareas que faltan por hacer y justo de
 1. Estudio descriptivo de las variables (distribuciones, datos ausentes, otras cosillas de interés), con visualización. Añadir siempre al estudio de cada variable el estudio de la relación de esa variable con la variable objetivo.
  
 	Se puede dividir en partes; id metiendo un párrafo aquí abajo tipo:
-		-- Alex: Análisis Descriptivo (Exploratorio) de vars 1-15. Archivo: anal_expl_01.R
+		-- Alex: Análisis Descriptivo (Exploratorio) de vars 1-25. Archivo: anal_expl_01.R
 
 	Timeline:
 		Fecha límite para la finalización de esta tarea: 07-02-2019.
