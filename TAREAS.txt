@@ -21,7 +21,7 @@ En este documento podemos ir metiendo las tareas que faltan por hacer y justo de
 	Timeline:
 		Fecha límite para la finalización de esta tarea: 02-02-2019
 		Avance a fecha 01-02-2019:
-			--
+			-- *Alex*: Hecha, a la espera de validación. 
 			--
 			--
 4.  Comprobar cómo implementar la API de Google Vision sobre nuestras imágenes y, de forma automática, guardar diferentes variables obtenidas de esas imágenes. 

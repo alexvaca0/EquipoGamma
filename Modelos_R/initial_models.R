@@ -3,22 +3,100 @@
 #be taken for each method. 
 
 library(caret)
+library(caretEnsemble)
+
+
 
 models <- unique(modelLookup()[modelLookup()$forReg,c(1)])
 
 
 df <- read.csv('datos.csv', fileEncoding = 'utf-8', stringsAsFactors = F)
 
-X <- df[ , - #numero de fila de la var obj]
-           ];
+df_numeric <- df[, unlist(lapply(df, is.numeric))]
 
-y <- df[ , #num fila var obj]
-        ]
-
-control <- trainControl(method="repeatedcv", number=5, repeats=1)
+X <- df[ , ]
 
 
-new_df <- 
+y <- df[ , ]
+
+
+set.seed(123)
+part.index <- createDataPartition(concrete_rand$strength, 
+                                  p = 0.8,                         
+                                  list = FALSE)
+X_train <- X[part.index, ]
+X_test <- X[-part.index, ]
+y_train <- y[part.index]
+y_test <- y[-part.index]
+
+
+set.seed(123)
+
+registerDoParallel(4)
+getDoParWorkers()
+
+control <- trainControl(method = "cv", # for “cross-validation”
+                           number = 5, # number of k-folds
+                           savePredictions = "final",
+                           allowParallel = TRUE)
+
+
+set.seed(222)
+model_list <- caretList(X_train,
+                        y_train,
+                        trControl = my_control,
+                        methodList = models,
+                        tuneList = NULL,
+                        continue_on_fail = TRUE, 
+                        preProcess = c("center","scale"))
+
+
+models_results <- data.frame(model = models)
+
+
+min_error <- c()
+
+for (model in model_list) {
+  
+  if(all(!is.na(model_list$model$results$RMSE))) {
+    
+    min_error <- c(min_error, min(model_list$model$results$RMSE, na.rm=T))
+    
+  } else {
+    
+    min_error <- c(min_error, NA)
+    
+  }
+  
+}
+
+min_mae <- c()
+
+for (model in model_list) {
+  
+  if(all(!is.na(model_list$model$results$MAE))) {
+    
+    min_mae <- c(min_mae, min(model_list$model$results$MAE, na.rm=T))
+    
+  } else {
+    
+    min_mae <- c(min_mae, NA)
+    
+  }
+  
+}
+
+models_results$MAE <- min_mae
+
+
+write.csv(models_results, 'preliminary_models_resylts.csv', sep = ',', fileEncoding = 'utf-8')
+
+
+
+
+
+
+
 
 
 
