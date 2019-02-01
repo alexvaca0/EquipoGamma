@@ -1,0 +1,4 @@
+OBSERVACIONES PRELIMINARES:
+
+- El dataset está compuesto por datos tanto de idealista como de la Haya; podríamos introducir alguna variable que tuviera en cuenta el tráfico que hay en cada una o algo así.
+- Gran número de outliers en la variable metros_totales
