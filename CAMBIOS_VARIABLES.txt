@@ -1,2 +1,6 @@
 CAMBIOS EXPLORATORIO
 
+- Variable Metros totales a logaritmo
+
+- Variables Metros utiles a logaritmo
+
