@@ -5,17 +5,48 @@
 library(caret)
 library(caretEnsemble)
 library(doParallel)
+library(dplyr)
+
+library(data.table)
+library(ggplot2)
 
 
 models <- unique(modelLookup()[modelLookup()$forReg,c(1)])
 
 
 
-df <- read.csv('datos.csv', fileEncoding = 'utf-8', stringsAsFactors = F)
+df <-  fread('Modelar_UH2019.txt', encoding = 'Latin-1')
 
-df_numeric <- df[, unlist(lapply(df, is.numeric))]
+df$HY_id <- as.character(df$HY_id)
 
-X <- df_numeric[ , ]
+df$HY_provincia <- as.factor(df$HY_provincia)
+
+df$HY_metros_totales <- log1p(df$HY_metros_totales)
+
+df[is.na(df$HY_metros_utiles), 'HY_metros_utiles'] <- df$HY_metros_totales[is.na(df$HY_metros_utiles)]
+
+df$HY_metros_utiles <- log1p(df$HY_metros_utiles)
+
+df$HY_num_banos <- log1p(df$HY_num_banos)
+
+
+
+
+myfunc <- function(x) {
+  
+  is.numeric(x) | is.factor(x)
+}
+
+
+cols <- unlist(lapply(df, is.numeric))
+
+cols2 <- unlist(lapply(df, is.factor))
+  
+df_numeric <- data.frame(df)[ , cols | cols2]
+
+df_numeric$HY_antiguedad <- NULL
+
+X <- df_numeric[ ,]
 
 
 y <- df_numeric[ , ]

@@ -5,3 +5,6 @@ OBSERVACIONES PRELIMINARES:
 
 - En la columna de HY_distribución habrá que hacer text mining para extraer de ahí el número de dormitorios, la cocina, si tiene o no planta baja etc... es como una segunda descripción.
 
+- En el número de baños hay cosas raras; hay 8 casas con 99 baños... esto no me termina de cuadrar del todo bien, me resulta imposible. Si es cierto que el precio general de estas casas es relativamente alto pero...
+
+- Vemos que no hay relación clara entre precio y Target, ni entre precio /m^2 y target; sin embargo si que parece haber un pico en el target más o menos hacia la mitad de precio / m^2... Curioso; esto podría indicar que hasta un determinado precio el interés crece porque la gente lo percibe como un mejor inmobiliario, sin embargo por encima de ese precio pocas personas pueden pagarlo y vuelve a bajar. Curiosamente, si también sacamos el logaritmo del target si que parece haber una tendencia hacia abajo...
