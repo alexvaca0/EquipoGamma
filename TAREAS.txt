@@ -5,6 +5,7 @@ En este documento podemos ir metiendo las tareas que faltan por hacer y justo de
  
 	Se puede dividir en partes; id metiendo un párrafo aquí abajo tipo:
 		-- Alex: Análisis Descriptivo (Exploratorio) de vars 1-25. Archivo: anal_expl_01.R
+		-- Gustavo: Análisis Descriptivo (Exploratorio) de vars 26-52. Archivo: anal_expl_02.R
 
 	Timeline:
 		Fecha límite para la finalización de esta tarea: 07-02-2019.
