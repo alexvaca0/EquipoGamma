@@ -4,3 +4,5 @@ CAMBIOS EXPLORATORIO
 
 - Variables Metros utiles a logaritmo
 
+- Variable Metros utiles: rellenos los NAs con las observaciones de metros totales
+
