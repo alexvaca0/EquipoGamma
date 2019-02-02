@@ -8,6 +8,11 @@ library(dplyr)
 library(ggplot2)
 library(outliers)
 
+install.packages('tm')
+library(tm)
+install.packages('stringr')
+library(stringr)
+
 df <- fread('Estimar_UH2019.txt', encoding = 'UTF-8')
 df <- fread('Modelar_UH2019.txt', encoding = 'UTF-8')
 
@@ -17,7 +22,20 @@ cor(complete.cases(df$HY_metros_utiles),
     complete.cases(df$HY_metros_totales) )
 # -0.003239806 
 
+pr <- data.frame(df$HY_metros_utiles,df$HY_metros_totales)
 
+
+test <- df$HY_descripcion
+test <- (test)
+test <- tolower(test)
+test <- removeNumbers(test)
+test <- str_replace_all(test, "  ", " ")
+test <- str_replace_all(test, ",", " ")
+class(test[1])
+
+
+  
+  
 rm(list=ls())
 rm(df)
 
