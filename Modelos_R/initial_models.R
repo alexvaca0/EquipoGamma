@@ -46,10 +46,40 @@ df_numeric <- data.frame(df)[ , cols | cols2]
 
 df_numeric$HY_antiguedad <- NULL
 
-X <- df_numeric[ ,]
+df_numeric$IDEA_ind_elasticidad <- NULL
+
+df_numeric$HY_precio_anterior[is.na(df_numeric$HY_precio_anterior)] <- df_numeric$HY_precio[is.na(df_numeric$HY_precio_anterior)]
 
 
-y <- df_numeric[ , ]
+no_rows_ruidosas <- function(df) {
+  
+  nc <- ncol(df)
+  
+  df_new <- df
+  
+  for(i in 1:nrow(df)) {
+    
+    if((sum(is.na(df[i,])) / nc) > 0.2 ) {
+      
+      df_new <- df_new[-i, ]
+      
+    } else {
+      
+      next
+      
+    }
+  }
+  
+  return(df_new)
+}
+
+numerico_sin_ruido <-  no_rows_ruidosas(df_numeric)
+
+numerico_sin_ruido <- numerico_sin_ruido[complete.cases(numerico_sin_ruido), ]
+
+X <- numerico_sin_ruido[ , -ncol(numerico_sin_ruido)]
+
+y <- numerico_sin_ruido[ , 'TARGET']
 
 
 set.seed(123)
