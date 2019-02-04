@@ -4,11 +4,11 @@ library(dplyr)
 library(ggplot2)
 library(outliers)
 
-df <-  fread('Modelar_UH2019.txt', encoding = 'Latin-1')
+df <-  fread('Modelar_UH2019.txt', encoding = 'UTF-8')
 
 str(df)
 
-
+names(df)[1:25]
 ##cambiamos el id a char.
 
 df$HY_id <- as.character(df$HY_id)
@@ -60,7 +60,7 @@ boxplot(df$HY_metros_totales)
 outlier(df$HY_metros_totales)
 
 #df1 <-  df[df$HY_metros_totales != 1820000, ]
-
+df1 <- df
 
 
 df1 %>%
@@ -70,6 +70,16 @@ df1 %>%
   geom_histogram(bins = 100)
 
 #Vale, esto está mucho mejor. Decidimos entonces sacar el logaritmo de esta varable para que nos salgan cosas razonables.
+
+df1[df1$HY_tipo ] 
+  
+  ggplot(aes(x = log1p(HY_metros_totales), y = log1p(TARGET), color = HY_tipo)) +
+  
+  geom_point() +
+  
+  geom_smooth(method="loess", se = T)
+
+#Además, hay que tomar decisiones con los 0's, entre otras cosas, además de con los valores ausentes. 
 
 df1$HY_metros_totales <- log1p(df1$HY_metros_totales)
 
@@ -81,6 +91,13 @@ df1 %>%
   ggplot(aes(x = log1p(HY_metros_utiles))) +
   
   geom_histogram(bins = 100)
+
+
+df1 %>%
+  
+  ggplot(aes(x = log1p(HY_metros_utiles), y = HY_metros_totales)) +
+  
+  geom_point()
 
 #como hay muchísimos valores ausentes para esta variable, vamos a meterle en los NA el valor de los metros totales
 
@@ -134,4 +151,249 @@ df1 %>%
   geom_point() +
   
   geom_smooth(method = "lm", se = F)
+
+
+###HY_cert_energ###
+
+summary(as.factor(df1$HY_cert_energ))
+
+df1 %>%
+  
+  group_by(HY_cert_energ) %>%
+  
+  summarise(media_target = mean(TARGET)) %>%
+  
+  ggplot(aes(x = HY_cert_energ, y = media_target)) +
+  
+  geom_point()
+
+
+#Parece que si existe una diferencia en la media del target en función de la certificación energética
+
+df1$HY_cert_energ[df1$HY_cert_energ == ""] <- "no"
+
+df1$HY_cert_energ <- as.factor(df1$HY_cert_energ)
+
+
+
+### HY_num_terrazas ###
+
+boxplot(df1$HY_num_terrazas)
+
+hist(df1$HY_num_terrazas)
+
+#hist(log1p(df1$HY_num_terrazas))
+
+cor(df1$HY_num_terrazas, df1$TARGET)
+
+plot(df1$HY_num_terrazas, df1$TARGET)
+#tiene pinta de que esta variable va a ser poco importante...
+
+df1$tiene_terraza <- ifelse(df1$HY_num_terrazas > 0, 1, 0)
+
+df1 %>%
+  
+  group_by(tiene_terraza) %>%
+  
+  summarise(target = mean(TARGET)) %>%
+  
+  ggplot(aes(x = tiene_terraza, y = target)) +
+  
+  geom_point()
+
+
+#vale, ahí si vemos una relación clara; las casas con terraza se ven más. 
+
+### HY_ascensor###
+
+summary(df1$HY_ascensor)
+
+df1$HY_ascensor[1:10]
+
+#esto ya es una variable binaria
+
+sum(is.na(df1$HY_ascensor))
+
+
+df1 %>%
+  
+  group_by(HY_ascensor) %>%
+  
+  summarise(target = mean(TARGET)) %>%
+  
+  
+  ggplot(aes(x = HY_ascensor, y = target)) +
+  
+  geom_point()
+
+#aquí las diferencias si nos fijamos bien son muy pequeñas entre las casas con y sin ascensor. 
+
+####Trastero####
+
+summary(df1$HY_trastero) #otra variable binaria.
+#solo un 6% de las casas tienen trastero.
+
+df1%>%
+  
+  group_by(HY_trastero) %>%
+  
+  summarise(target = mean(TARGET)) %>%
+  
+  ggplot(aes(x = HY_trastero, y = target)) +
+  
+  geom_point()
+#alguna diferencia aunque tampoco demasiado significativas; la gente mira algo más las casas con trastero.
+
+
+### HY_num_garajes ####
+
+summary(df1$HY_num_garajes)
+
+#quizás sea buena idea agruparla en 0,1 ...
+
+df1 %>%
+  
+  group_by(HY_num_garajes) %>%
+  
+  summarise(target = mean(TARGET)) %>%
+  
+  ggplot(aes(x = HY_num_garajes, y = target)) +
+  
+  geom_point()
+
+#está claro, cuantos más garajes tenemos, nos encontramos con que la media del target es mayor. 
+#las diferencias son mayores entre tener 0 o 1 garajes que entre 1 y 2... 
+#cuando veáis esto, decid si os parece mejor pasarlo a 0,1 o dejarlo como está. 
+
+df1$tiene_garaje <- ifelse(df1$HY_num_garajes > 0, 1, 0)
+
+df1 %>%
+  
+  group_by(tiene_garaje) %>%
+  
+  summarise(target = mean(TARGET)) %>%
+  
+  ggplot(aes(x = tiene_garaje, y = target)) +
+  
+  geom_point()
+
+#aquí vemos unas diferencias más significativas...
+
+summary(df1$tiene_garaje)
+#solo el 9,6% de las casas tienen garaje, por lo que puede ser una buena idea dejarlo en variable binaria.
+
+
+
+#### HY_precio ####
+
+boxplot(df1$HY_precio) #muy asimétrica...
+
+hist(df1$HY_precio)
+
+hist(log1p(df1$HY_precio)) #esto está bastante mejor... mucho mejor sacando el logaritmo. 
+
+df1 %>%
+  
+  ggplot(aes(x = log1p(HY_precio), y = log1p(TARGET))) +
+  
+  geom_point() +
+  
+  geom_smooth(method = "loess", se = T)
+#apenas se nota un efecto...
+
+df1 %>%
+  
+  ggplot(aes(x = log1p(HY_precio), y = log1p(HY_precio_anterior))) +
+  
+  geom_point()
+
+#parece casi una línea recta; puede ser una buena idea sustituir los ausentes en precio anterior por el precio actual...
+
+hist(log1p(df1$HY_precio_anterior))
+
+#se parece mucho al histograma del precio... 
+
+
+#### IDEA_area ####
+
+summary(df1$IDEA_area)
+
+df1 %>%
+  
+  group_by(HY_tipo, HY_provincia) %>%
+  
+  summarise(area = median(IDEA_area, na.rm=T), num = n()) %>%
+  
+  ggplot(aes(x = HY_provincia, y = area, color = HY_tipo, size = num)) +
+  
+  geom_point()
+
+
+#al haber diferencias significativas por provincia, una buena idea para imputar NAs puede ser imputarlos por provincia
+#tambien hay diferencias significativas por tipo de casa...; vamos a usar esto también 
+
+area_por_provincia <- data.frame(df1 %>%
+  
+  group_by(HY_tipo, HY_provincia) %>%
+  
+  summarise(area = mean(IDEA_area, na.rm = T)))
+
+fill_area_nas <- function(df = df1, medias = area_por_provincia) {
+  
+  for(i in 1:nrow(df)) {
+    
+    if(is.na(df[i, "IDEA_area"])) {
+      
+      media <- medias[which(medias$HY_provincia == df$HY_provincia[i] & medias$HY_tipo == df$HY_tipo[i]), "area"]
+      
+      df[i, "IDEA_area"] <- media
+      
+    } else {
+      
+      next
+    }
+    
+  }
+  
+  return(df)
+}
+
+df2 <- fill_area_nas()
+
+sum(is.na(df2$IDEA_area))
+
+#Vale, ahora ya lo tenemos limpio de NAs.
+
+hist(log1p(df1$IDEA_area))
+hist(log1p(df2$IDEA_area))
+
+
+####POblación####
+
+df1 %>%
+  
+  ggplot(aes(x = IDEA_poblacion, y = TARGET)) +
+  
+  geom_point() +
+  
+  geom_smooth(method = "lm", se = T)
+
+#nada, parece que la población no afecta al target...
+#igual no es necesario meter poblacion...
+
+
+#Densidad #####
+df1 %>%
+  
+  ggplot(aes(x = IDEA_densidad^2, y = TARGET)) +
+  
+  geom_point() +
+  
+  geom_smooth(method = "loess", se = F)
+#tampoco parece ser relevante la densidad...
+
+
+####IDEA_pc_1960####
+
+
 
