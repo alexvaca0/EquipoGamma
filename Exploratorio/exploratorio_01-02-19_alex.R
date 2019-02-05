@@ -487,3 +487,30 @@ X_c$TARGET <- X[complete.cases(X), ]$TARGET
 X_c$TARGET_real <- NULL
 
 write.csv(X_c, "../datos_modelar/transformados01.csv", fileEncoding = "utf-8")
+
+
+library(GGally)
+
+ggcorr(X_c, label = F)
+#la variable target está muy poco correlacionada con las demás...
+
+require(mclust)
+
+mcl <- Mclust(X_c)
+
+
+X_c$gr2 <- mcl$classification
+
+X_c %>%
+  
+  group_by(gr2) %>%
+  
+  summarise(target = mean(TARGET), num = n()) %>%
+  
+  ggplot(aes(x = gr2, y = target, size = num) ) +
+  
+  geom_point()
+
+X_c$gr <- NULL
+
+names(X_c)[ncol(X_c)] <- c("groups")
