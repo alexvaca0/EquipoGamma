@@ -1,0 +1,12 @@
+1. Variable HY_provincia, se deja como está y se le mete un cruce de CCAA adicional. 
+***** Decisión: dejar ambas o quedarnos con 1 de las 2, y en ese caso, cual! *****
+
+2. Variable HY_tipo, se deja como está; tiene relación con el target. Una opción podría ser agrupar los diferentes tipos en menos clases, en 2 o 3... como para que haya menos problemas de demasiadas clases (columnas). 
+
+3. Variable HY_metros_totales; los valores ausentes los podemos rellenar por medianas agrupando por provincia y tipo de inmobiliario. Son solo 34, podría valer. Adicionalmente, transformamos a logaritmo!
+
+4. 
+5. 
+6.
+7. 
+8.

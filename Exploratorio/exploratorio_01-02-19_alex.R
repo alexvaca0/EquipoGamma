@@ -6,6 +6,14 @@ library(outliers)
 
 df <-  fread('Modelar_UH2019.txt', encoding = 'UTF-8')
 
+provincias <- fread('provincias.csv', encoding = "UTF-8")
+
+names(df)[3] <- "provincia"
+
+df <- left_join(df, provincias, by = "provincia")
+
+names(df)[3] <- "HY_provincia"
+
 str(df)
 
 names(df)[1:25]
@@ -23,9 +31,21 @@ df %>%
   
   summarise(media_target = mean(TARGET)) %>%
   
-  ggplot(aes(x = HY_provincia, y = media_target)) +
+  ggplot(aes(x = reorder(HY_provincia, media_target), y = media_target)) +
+  geom_bar(stat = 'identity')+
+  coord_flip()
+
+df %>%
   
-  geom_point()
+  group_by(ccaa) %>%
+  
+  summarise(media_target = mean(TARGET)) %>%
+  
+  ggplot(aes(x = reorder(ccaa, media_target), y = media_target)) +
+  
+  geom_bar(stat = "identity") +
+  
+  coord_flip()
 
 
 ggplot(df, aes(x = TARGET, fill = HY_provincia)) +
@@ -41,11 +61,16 @@ df %>%
   
   summarise(media_target = mean(TARGET)) %>%
   
-  ggplot(aes(x = HY_tipo, y = media_target)) +
+  ggplot(aes(x = reorder(HY_tipo, media_target), y = media_target)) +
   
-  geom_point()
+  geom_bar(stat = "identity") +
+  
+  coord_flip()
+
 ##De nuevo, parece que hay diferencias en el tiempo de media que la gente pasa viendo
 ## la página en función del tipo de vivienda que sea. 
+
+sum(is.na(df$HY_tipo)) #sin ningún valor ausente!.
 
 df %>%
   
@@ -59,6 +84,8 @@ boxplot(df$HY_metros_totales)
 
 outlier(df$HY_metros_totales)
 
+
+
 #df1 <-  df[df$HY_metros_totales != 1820000, ]
 df1 <- df
 
@@ -71,7 +98,7 @@ df1 %>%
 
 #Vale, esto está mucho mejor. Decidimos entonces sacar el logaritmo de esta varable para que nos salgan cosas razonables.
 
-df1[df1$HY_tipo ] 
+df1 %>% 
   
   ggplot(aes(x = log1p(HY_metros_totales), y = log1p(TARGET), color = HY_tipo)) +
   
@@ -79,7 +106,65 @@ df1[df1$HY_tipo ]
   
   geom_smooth(method="loess", se = T)
 
+sum(is.na(df1$HY_metros_totales))
+
+df1 %>%
+  
+  ggplot(aes(x = log1p(HY_metros_totales), y = TARGET)) +
+  
+  geom_point()
+
+
+
 #Además, hay que tomar decisiones con los 0's, entre otras cosas, además de con los valores ausentes. 
+
+metros_agrupados <- df1 %>%
+  
+  group_by(HY_provincia, HY_tipo) %>%
+  
+  summarise(mediana = median(HY_metros_totales, na.rm = T))
+
+fill_metros <- function(df = df1, grouped = metros_agrupados) {
+  
+  new <- df
+  
+  for(i in 1:nrow(new)) {
+    
+    if(is.na(new[i, 'HY_metros_totales'])) {
+      
+      if(!is.na(grouped[which(grouped$HY_provincia == new$HY_provincia[i] & grouped$HY_tipo == new$HY_tipo[i]), 'mediana'])){
+        
+        valor <- grouped[which(grouped$HY_provincia == new$HY_provincia[i] & grouped$HY_tipo == new$HY_tipo[i]), 'mediana']
+        
+        new[i, 'HY_metros_totales'] <- valor
+        
+      } else {
+        
+        newgr <- df %>%
+          
+          group_by(HY_tipo) %>%
+          
+          summarise(mediana = median(HY_metros_totales, na.rm=T))
+        
+        valor <- newgr[which(newgr$HY_provincia == new$HY_provincia[i]), 'mediana']
+        
+        new[i, 'HY_metros_totales'] <- valor
+        
+      }
+      
+    } else {
+      
+      next
+    }
+    
+  }
+  
+  return(new)
+}
+
+df1 <- fill_metros()
+
+sum(is.na(df1$HY_metros_totales))
 
 df1$HY_metros_totales <- log1p(df1$HY_metros_totales)
 
