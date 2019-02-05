@@ -514,3 +514,18 @@ X_c %>%
 X_c$gr <- NULL
 
 names(X_c)[ncol(X_c)] <- c("groups")
+
+
+X_c %>%
+  
+  group_by(groups) %>%
+  
+  summarise(target = mean(TARGET), num = n()) %>%
+  
+  ggplot(aes(x = groups, y = target, size = num) ) +
+  
+  geom_point()
+
+write.csv(X_c, "../datos_modelar/transformados01.csv", fileEncoding = "utf-8")
+
+
