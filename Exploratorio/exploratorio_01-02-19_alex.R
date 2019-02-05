@@ -395,5 +395,88 @@ df1 %>%
 
 ####IDEA_pc_1960####
 
+boxplot(df1$IDEA_pc_1960)
 
+hist(df1$IDEA_pc_1960)
+
+hist(log1p(df1$IDEA_pc_1960)) #lo normaliza un poco...
+
+#pero tampoco mucho.
+
+X <- df1
+
+X$HY_id <- NULL
+
+X$HY_descripcion <- NULL
+
+X$HY_distribucion <- NULL
+
+X$HY_tipo <- as.factor(X$HY_tipo)
+
+X_no_nas <- X[complete.cases(X), ]
+
+dummy <- X_no_nas[ , c("HY_provincia", "HY_tipo", "HY_cert_energ")]
+
+X_no_nas[ , c("HY_provincia", "HY_tipo", "HY_cert_energ")] <- NULL
+
+library(mltools)
+
+dummy_oh <- one_hot(as.data.table(dummy))
+
+du <- data.frame(dummy_oh)
+
+X_no_nas <- scale(X_no_nas)
+
+X_c <- cbind(X_no_nas, du)
+
+X_c$TARGET <- X_c$TARGET*10
+
+library(flexclust)
+library(factoextra)
+library(cluster)
+
+kmeans_fit <-  kmeans(X_c, centers = 2, iter.max = 50, nstart = 100)
+
+kmeans_fit$centers
+
+fviz_cluster(kmeans_fit, data = X_c[, 1:47], geom = c("point"),ellipse.type = 'norm', pointsize=1)+
+  theme_minimal()+geom_text(label=as.character((X_c$TARGET/10)*sd(df1$TARGET) + mean(df1$TARGET)),hjust=0, vjust=0,size=2,check_overlap = T)+scale_fill_brewer(palette="Paired")
+
+
+groups = kmeans_fit$cluster
+
+
+d <- dist(X_c, method="euclidean")  
+sil = silhouette(groups, d)
+plot(sil, col=1:4, main="", border=NA)
+summary(sil)
+
+X_c$groups <- groups
+
+X_c$TARGET_real <- (X_c$TARGET/10)*sd(df1$TARGET) + mean(df1$TARGET)
+
+X_c %>%
+  
+  group_by(groups) %>%
+  
+  summarise(target = mean(TARGET_real, na.rm = T),
+            numero = n()) %>%
+  
+  ggplot(aes(x = groups, y = target, color = groups, size = numero)) +
+  
+  geom_point()
+
+#Parece que con el análisis de cluster que hemos hecho sí que podemos identificar diferentes tiempos de estancia en las páginas web. 
+#Una buena idea sería hacer un modelo para cada cluster. Es una pena no tener más datos completos para tirar el modelo
+#de aprendizaje no supervisado; ya que esto nos permitiría ver más tipos de casas y sacar más conclusiones. Creo que el siguiente
+#paso va a ser eliminar algunas columnas ruidosas y quedarnos solamente con las que nos renten, para así hacer un modelo de clustering
+#con más observaciones, y una vez hayamos conseguido un modelo que más o menos nos guste, podemos tirarle. 
+
+gr <- X_c$groups
+
+gr <- one_hot(as.data.table(gr))
+
+X_c$groups <- NULL
+
+X_c <- cbind(X_c, gr)
 

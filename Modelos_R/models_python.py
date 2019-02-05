@@ -11,7 +11,7 @@ import pandas as pd
 import numpy as np
 import keras
 
-import xgboost
+#import xgboost
 
 from sklearn.model_selection import train_test_split
 
@@ -34,6 +34,8 @@ from sklearn.model_selection import KFold
 from sklearn.preprocessing import MinMaxScaler
 
 from sklearn.pipeline import Pipeline
+
+import keras.backend as K
 
 data = pd.read_csv('Modelar_UH2019.txt', sep = '|', encoding = 'utf-8')
 
@@ -81,7 +83,13 @@ X = np.array(df_no_na.drop('TARGET', axis = 1))
 
 Y = np.array(df_no_na['TARGET']).reshape((5036, 1))
 
+''' No funciona, en Keras no hay medianas
 
+def median_absolute_error(y_true, y_pred):
+    
+    return K.median(K.abs(y_true-y_pred))
+
+''' 
 
 def GammaTeamEstimator(dropout = 0.2):
   
@@ -109,7 +117,7 @@ def GammaTeamEstimator(dropout = 0.2):
   model.add(Dense(1, kernel_initializer = 'normal'))
   
   #Compile Model. 
-  model.compile(loss = 'mean_absolute_error',
+  model.compile(loss = "mae",
                optimizer = 'adam')
   
   return model
@@ -124,7 +132,89 @@ kfold = KFold(n_splits=10, random_state=7)
 results = cross_val_score(pipeline, X, Y, cv=kfold)
 print("Wider: %.2f (%.2f) Median Absolute Error" % (results.mean(), results.std()))
 
+X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size = 0.2, random_state=7)
 
+
+model = GammaTeamEstimator()
+
+model.fit(X_train, y_train, epochs = 60, batch_size = 12, verbose = 2)
+
+predicted_y = model.predict(X_test)
+
+def median_absolute_error(y_true, y_pred):
+    
+    return np.median(np.abs(y_true - y_pred))
+
+
+median_absolute_error(y_test, predicted_y) #en teoría en el test nos equivocamos sólo en 0.48... pero hay que pasar estos resultados a exp
+
+y_test1 = np.exp(y_test) - 1
+
+y_pred1 = np.exp(predicted_y) -1
+
+median_absolute_error(y_test1, y_pred1) #pero no... aún estamos lejos de conseguir un modelo decente;
+#se equivoca muchísimo en términos de segundos... en logsegundos no está mal, pero...
+
+def model2(dropout = 0.2, output_size = 1):
+    
+    model = Sequential()
+
+    model.add(Dense(80, kernel_initializer = "normal", activation = "relu"))
+    
+    model.add(Dropout(dropout))
+    
+    model.add(Dense(40, kernel_initializer = "normal", activation = "relu"))
+    
+    model.add(Dropout(dropout))
+    
+    model.add(Dense(20, kernel_initializer = "normal", activation = "relu"))
+    
+    model.add(Dropout(dropout))
+    
+    model.add(Dense(10, kernel_initializer = "normal", activation = "relu"))
+    
+    model.add(Dropout(dropout))
+    
+    model.add(Dense(output_size))
+    
+    model.add(Activation("linear"))
+    
+    model.compile(loss = "mae", 
+                  optimizer = "adam")
+    
+    return model
+
+
+model2 = model2()
+
+model2.fit(X_train, y_train, epochs = 50, batch_size = 5, verbose = 2)
+
+predicted = np.exp(model2.predict(X_test)) -1 
+
+median_absolute_error(y_test1, predicted) #malísimo de momento...
+
+
+scaler = MinMaxScaler()
+
+scaled_df = scaler.fit_transform(df_no_na)
+
+scaled_df = pd.DataFrame(scaled_df, columns = df.columns)
+
+X = np.array(scaled_df.drop('TARGET', axis = 1))
+
+Y = np.array(scaled_df['TARGET']).reshape((5036, 1))
+
+X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size = 0.2, random_state=7)
+
+
+model2.fit(X_train, y_train, epochs = 50, batch_size = 8, verbose = 2)
+
+predicted = model2.predict(X_test)
+
+
+
+
+'''
 ## XG Boost
 
 xgb = xgboost.XGBRegressor(colsample_bytree=0.4,
@@ -140,6 +230,10 @@ xgb = xgboost.XGBRegressor(colsample_bytree=0.4,
 
 X_train, y_train, X_test, y_test = train_test_split(X, Y, test_size = 0.2, random_state = 7)
 
+'''
+
+'''
 xgb.fit(train_dataset[every_column_except_y],train_dataset['SalePrice'])
 
 OrderedDict(sorted(model.booster().get_fscore().items(), key=lambda t: t[1], reverse=True))
+'''
