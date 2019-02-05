@@ -480,3 +480,10 @@ X_c$groups <- NULL
 
 X_c <- cbind(X_c, gr)
 
+X_c$TARGET <- NULL
+
+X_c$TARGET <- X[complete.cases(X), ]$TARGET
+
+X_c$TARGET_real <- NULL
+
+write.csv(X_c, "../datos_modelar/transformados01.csv", fileEncoding = "utf-8")
