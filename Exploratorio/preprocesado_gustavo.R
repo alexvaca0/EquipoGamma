@@ -63,14 +63,18 @@ sum(is.na(df$IDEA_pc_1990_99))/nrow(df)
 
 table(df$IDEA_pc_1990_99) # 56 entradas tienen el valor 0 (#cero#)
 
-
 # No hay mucha relación entre la construcción de la década de los 90 y el target
 df1 %>%
   ggplot(aes(x = IDEA_pc_1990_99, y = TARGET)) +
   geom_point(alpha=0.1) +
   geom_smooth(method = "loess", se = F)
 
-# Eliminamos la variable
+# Probamos la misma variable con el TARGET diferenciando los que tienen y no tienen NAs
+df1$IDEA_pc_1990_99 <- ifelse(is.na(df$IDEA_pc_1990_99), "YES", "NO")
+sum(df1$IDEA_pc_1990_99 == "YES") #coincide con los NAs, está bien hecho
+df1 %>%
+  ggplot(aes(x = IDEA_pc_1990_99, y = TARGET, fill=IDEA_pc_1990_99)) +
+  geom_bar(stat="summary", fun.y="mean")
 
 
 
@@ -96,6 +100,13 @@ df1 %>%
   geom_point(alpha=0.1) +
   geom_smooth(method = "loess", se = F)
 
+# Probamos la misma variable con el TARGET diferenciando los que tienen y no tienen NAs
+df1$IDEA_pc_2000_10 <- ifelse(is.na(df$IDEA_pc_2000_10), "YES", "NO")
+sum(df1$IDEA_pc_2000_10 == "YES") #coincide con los NAs, está bien hecho
+
+df1 %>%
+  ggplot(aes(x = IDEA_pc_2000_10, y = TARGET, fill=IDEA_pc_2000_10)) +
+  geom_bar(stat="summary", fun.y="mean")
 # Eliminamos la variable
 
 
@@ -118,7 +129,14 @@ df1 %>%
   ggplot(aes(x = IDEA_pc_comercio, y = TARGET)) +
   geom_point(alpha=0.1)
 
+# Probamos la misma variable con el TARGET diferenciando los que tienen y no tienen NAs
+df1$IDEA_pc_comercio <- ifelse(is.na(df$IDEA_pc_comercio), "YES", "NO")
+sum(df1$IDEA_pc_comercio == "YES") #coincide con los NAs, está bien hecho
 
+df1 %>%
+  ggplot(aes(x = IDEA_pc_comercio, y = TARGET, fill=IDEA_pc_comercio)) +
+  geom_bar(stat="summary", fun.y="mean")
+# Eliminamos la variable
 
 ############################
 # df$IDEA_pc_industria df[,28]
@@ -141,6 +159,15 @@ df1 %>%
   ggplot(aes(x = IDEA_pc_industria, y = TARGET)) +
   geom_point(alpha=0.1) +
   geom_smooth(method = "loess", se = F)
+
+# Probamos la misma variable con el TARGET diferenciando los que tienen y no tienen NAs
+df1$IDEA_pc_industria <- ifelse(is.na(df$IDEA_pc_industria), "YES", "NO")
+sum(df1$IDEA_pc_industria == "YES") #coincide con los NAs, está bien hecho
+
+df1 %>%
+  ggplot(aes(x = IDEA_pc_industria, y = TARGET, fill=IDEA_pc_industria)) +
+  geom_bar(stat="summary", fun.y="mean")
+# Eliminamos la variable
 # pendiente
 
 ############################
@@ -164,6 +191,15 @@ df1 %>%
   ggplot(aes(x = IDEA_pc_oficina, y = TARGET)) +
   geom_point(alpha=0.1) +
   geom_smooth(method = "loess", se = F)
+
+# Probamos la misma variable con el TARGET diferenciando los que tienen y no tienen NAs
+df1$IDEA_pc_oficina <- ifelse(is.na(df$IDEA_pc_oficina), "YES", "NO")
+sum(df1$IDEA_pc_oficina == "YES") #coincide con los NAs, está bien hecho
+
+df1 %>%
+  ggplot(aes(x = IDEA_pc_oficina, y = TARGET, fill=IDEA_pc_oficina)) +
+  geom_bar(stat="summary", fun.y="mean")
+# Eliminamos la variable
 # pendiente
 
 ############################
@@ -187,7 +223,15 @@ df1 %>%
   geom_point(alpha=0.1) +
   geom_smooth(method = "loess", se = F)
 
-# Eliminar variable
+# Probamos la misma variable con el TARGET diferenciando los que tienen y no tienen NAs
+df1$IDEA_pc_otros <- ifelse(is.na(df$IDEA_pc_otros), "YES", "NO")
+sum(df1$IDEA_pc_otros == "YES") #coincide con los NAs, está bien hecho
+
+df1 %>%
+  ggplot(aes(x = IDEA_pc_otros, y = TARGET, fill=IDEA_pc_otros)) +
+  geom_bar(stat="summary", fun.y="mean")
+# Eliminamos la variable
+
 
 ############################
 # df$IDEA_pc_residencial df[,31]
@@ -208,7 +252,15 @@ df1 %>%
   geom_point(alpha=0.1) +
   geom_smooth(method = "loess", se = F)
 
-# eliminamos la variable
+# Probamos la misma variable con el TARGET diferenciando los que tienen y no tienen NAs
+df1$IDEA_pc_residencial <- ifelse(is.na(df$IDEA_pc_residencial), "YES", "NO")
+sum(df1$IDEA_pc_residencial == "YES") #coincide con los NAs, está bien hecho
+
+df1 %>%
+  ggplot(aes(x = IDEA_pc_residencial, y = TARGET, fill=IDEA_pc_residencial)) +
+  geom_bar(stat="summary", fun.y="mean")
+# Eliminamos la variable
+
 
 ############################
 # df$IDEA_pc_trast_parking df[,32]
@@ -227,7 +279,16 @@ df1 %>%
   ggplot(aes(x = IDEA_pc_trast_parking, y = TARGET)) +
   geom_point(alpha=0.1) +
   geom_smooth(method = "loess", se = F)
-# eliminamos la variable
+
+# Probamos la misma variable con el TARGET diferenciando los que tienen y no tienen NAs
+df1$IDEA_pc_trast_parking <- ifelse(is.na(df$IDEA_pc_trast_parking), "YES", "NO")
+sum(df1$IDEA_pc_trast_parking == "YES") #coincide con los NAs, está bien hecho
+
+df1 %>%
+  ggplot(aes(x = IDEA_pc_trast_parking, y = TARGET, fill=IDEA_pc_trast_parking)) +
+  geom_bar(stat="summary", fun.y="mean")
+# Eliminamos la variable
+
 
 ############################
 # df$IDEA_ind_tienda df[,33]
@@ -249,7 +310,15 @@ df1 %>%
   ggplot(aes(x = IDEA_ind_tienda, y = TARGET)) +
   geom_point(alpha=0.1) +
   geom_smooth(method = "loess", se = F)
-# eliminamos la variable
+
+# Probamos la misma variable con el TARGET diferenciando los que tienen y no tienen NAs
+df1$IDEA_ind_tienda <- ifelse(is.na(df$IDEA_ind_tienda), "YES", "NO")
+sum(df1$IDEA_ind_tienda == "YES") #coincide con los NAs, está bien hecho
+
+df1 %>%
+  ggplot(aes(x = IDEA_ind_tienda, y = TARGET, fill=IDEA_ind_tienda)) +
+  geom_bar(stat="summary", fun.y="mean")
+# Eliminamos la variable
 
 
 ############################
@@ -272,7 +341,15 @@ df1 %>%
   ggplot(aes(x = IDEA_ind_turismo, y = TARGET)) +
   geom_point(alpha=0.1) +
   geom_smooth(method = "loess", se = F)
-# eliminamos la variable
+
+# Probamos la misma variable con el TARGET diferenciando los que tienen y no tienen NAs
+df1$IDEA_ind_turismo <- ifelse(is.na(df$IDEA_ind_turismo), "YES", "NO")
+sum(df1$IDEA_ind_turismo == "YES") #coincide con los NAs, está bien hecho
+
+df1 %>%
+  ggplot(aes(x = IDEA_ind_turismo, y = TARGET, fill=IDEA_ind_turismo)) +
+  geom_bar(stat="summary", fun.y="mean")
+# Eliminamos la variable
 
 
 
@@ -296,7 +373,15 @@ df1 %>%
   ggplot(aes(x = IDEA_ind_alimentacion, y = TARGET)) +
   geom_point(alpha=0.1) +
   geom_smooth(method = "loess", se = F)
-# eliminamos la variable
+
+# Probamos la misma variable con el TARGET diferenciando los que tienen y no tienen NAs
+df1$IDEA_ind_alimentacion <- ifelse(is.na(df$IDEA_ind_alimentacion), "YES", "NO")
+sum(df1$IDEA_ind_alimentacion == "YES") #coincide con los NAs, está bien hecho
+
+df1 %>%
+  ggplot(aes(x = IDEA_ind_alimentacion, y = TARGET, fill=IDEA_ind_alimentacion)) +
+  geom_bar(stat="summary", fun.y="mean")
+# Eliminamos la variable
 
 
 ############################
@@ -319,6 +404,15 @@ df1 %>%
   geom_point(alpha=0.1) +
   geom_smooth(method = "loess", se = F)
 
+# Probamos la misma variable con el TARGET diferenciando los que tienen y no tienen NAs
+df1$IDEA_ind_riqueza <- ifelse(is.na(df$IDEA_ind_riqueza), "YES", "NO")
+sum(df1$IDEA_ind_riqueza == "YES") #coincide con los NAs, está bien hecho
+
+df1 %>%
+  ggplot(aes(x = IDEA_ind_riqueza, y = TARGET, fill=IDEA_ind_riqueza)) +
+  geom_bar(stat="summary", fun.y="mean")
+# Eliminamos la variable
+
 
 ############################
 # df$IDEA_rent_alquiler df[,37]
@@ -340,7 +434,15 @@ df1 %>%
   ggplot(aes(x = IDEA_rent_alquiler, y = TARGET)) +
   geom_point(alpha=0.1) +
   geom_smooth(method = "loess", se = F)
-# eliminamos la variable
+
+# Probamos la misma variable con el TARGET diferenciando los que tienen y no tienen NAs
+df1$IDEA_rent_alquiler <- ifelse(is.na(df$IDEA_rent_alquiler), "YES", "NO")
+sum(df1$IDEA_rent_alquiler == "YES") #coincide con los NAs, está bien hecho
+
+df1 %>%
+  ggplot(aes(x = IDEA_rent_alquiler, y = TARGET, fill=IDEA_rent_alquiler)) +
+  geom_bar(stat="summary", fun.y="mean")
+# Eliminamos la variable
 
 
 ############################
@@ -362,7 +464,15 @@ df1 %>%
   ggplot(aes(x = IDEA_ind_elasticidad, y = TARGET)) +
   geom_point(alpha=0.1) +
   geom_smooth(method = "loess", se = F)
-# eliminamos la variable
+
+# Probamos la misma variable con el TARGET diferenciando los que tienen y no tienen NAs
+df1$IDEA_ind_elasticidad <- ifelse(is.na(df$IDEA_ind_elasticidad), "YES", "NO")
+sum(df1$IDEA_ind_elasticidad == "YES") #coincide con los NAs, está bien hecho
+
+df1 %>%
+  ggplot(aes(x = IDEA_ind_elasticidad, y = TARGET, fill=IDEA_ind_elasticidad)) +
+  geom_bar(stat="summary", fun.y="mean")
+# Eliminamos la variable
 
 
 ############################
@@ -384,7 +494,15 @@ df1 %>%
   ggplot(aes(x = IDEA_ind_liquidez, y = TARGET)) +
   geom_point(alpha=0.1) +
   geom_smooth(method = "loess", se = F)
-# eliminamos la variable
+
+# Probamos la misma variable con el TARGET diferenciando los que tienen y no tienen NAs
+df1$IDEA_ind_liquidez <- ifelse(is.na(df$IDEA_ind_liquidez), "YES", "NO")
+sum(df1$IDEA_ind_liquidez == "YES") #coincide con los NAs, está bien hecho
+
+df1 %>%
+  ggplot(aes(x = IDEA_ind_liquidez, y = TARGET, fill=IDEA_ind_liquidez)) +
+  geom_bar(stat="summary", fun.y="mean")
+# Eliminamos la variable
 
 
 ############################
@@ -407,7 +525,15 @@ df1 %>%
   ggplot(aes(x = IDEA_unitprice_sale_residential, y = TARGET)) +
   geom_point(alpha=0.1) +
   geom_smooth(method = "loess", se = F)
-# eliminamos la variable
+
+# Probamos la misma variable con el TARGET diferenciando los que tienen y no tienen NAs
+df1$IDEA_unitprice_sale_residential <- ifelse(is.na(df$IDEA_unitprice_sale_residential), "YES", "NO")
+sum(df1$IDEA_unitprice_sale_residential == "YES") #coincide con los NAs, está bien hecho
+
+df1 %>%
+  ggplot(aes(x = IDEA_unitprice_sale_residential, y = TARGET, fill=IDEA_unitprice_sale_residential)) +
+  geom_bar(stat="summary", fun.y="mean")
+# Eliminamos la variable
 
 
 
@@ -430,7 +556,15 @@ df1 %>%
   ggplot(aes(x = IDEA_price_sale_residential, y = TARGET)) +
   geom_point(alpha=0.1) +
   geom_smooth(method = "loess", se = F)
-# eliminamos la variable
+
+# Probamos la misma variable con el TARGET diferenciando los que tienen y no tienen NAs
+df1$IDEA_price_sale_residential <- ifelse(is.na(df$IDEA_price_sale_residential), "YES", "NO")
+sum(df1$IDEA_price_sale_residential == "YES") #coincide con los NAs, está bien hecho
+
+df1 %>%
+  ggplot(aes(x = IDEA_price_sale_residential, y = TARGET, fill=IDEA_price_sale_residential)) +
+  geom_bar(stat="summary", fun.y="mean")
+# Eliminamos la variable
 
 
 ############################
@@ -450,7 +584,15 @@ df1 %>%
   ggplot(aes(x = IDEA_stock_sale_residential, y = TARGET)) +
   geom_point(alpha=0.1) +
   geom_smooth(method = "loess", se = F)
-# eliminamos la variable
+
+# Probamos la misma variable con el TARGET diferenciando los que tienen y no tienen NAs
+df1$IDEA_stock_sale_residential <- ifelse(is.na(df$IDEA_stock_sale_residential), "YES", "NO")
+sum(df1$IDEA_stock_sale_residential == "YES") #coincide con los NAs, está bien hecho
+
+df1 %>%
+  ggplot(aes(x = IDEA_stock_sale_residential, y = TARGET, fill=IDEA_stock_sale_residential)) +
+  geom_bar(stat="summary", fun.y="mean")
+# Eliminamos la variable
 
 
 ############################
@@ -479,7 +621,15 @@ df1 %>% filter(df$IDEA_demand_sale_residential != 0) %>%
   ggplot(aes(x = IDEA_demand_sale_residential, y = TARGET)) +
   geom_point(alpha=0.1) +
   geom_smooth(method = "loess", se = F)
-# eliminamos la variable
+
+# Probamos la misma variable con el TARGET diferenciando los que tienen y no tienen NAs
+df1$IDEA_demand_sale_residential <- ifelse(is.na(df$IDEA_demand_sale_residential), "YES", "NO")
+sum(df1$IDEA_demand_sale_residential == "YES") #coincide con los NAs, está bien hecho
+
+df1 %>%
+  ggplot(aes(x = IDEA_demand_sale_residential, y = TARGET, fill=IDEA_demand_sale_residential)) +
+  geom_bar(stat="summary", fun.y="mean")
+# Eliminamos la variable
 
 
 ############################
@@ -505,7 +655,15 @@ df1 %>%
   ggplot(aes(x = IDEA_unitprice_rent_residential, y = TARGET)) +
   geom_point(alpha=0.1) +
   geom_smooth(method = "loess", se = F)
-# eliminamos la variable
+
+# Probamos la misma variable con el TARGET diferenciando los que tienen y no tienen NAs
+df1$IDEA_unitprice_rent_residential <- ifelse(is.na(df$IDEA_unitprice_rent_residential), "YES", "NO")
+sum(df1$IDEA_unitprice_rent_residential == "YES") #coincide con los NAs, está bien hecho
+
+df1 %>%
+  ggplot(aes(x = IDEA_unitprice_rent_residential, y = TARGET, fill=IDEA_unitprice_rent_residential)) +
+  geom_bar(stat="summary", fun.y="mean")
+# Eliminamos la variable
 
 
 ############################
@@ -525,7 +683,15 @@ df1 %>%
   ggplot(aes(x = IDEA_price_rent_residential, y = TARGET)) +
   geom_point(alpha=0.1) +
   geom_smooth(method = "loess", se = F)
-# eliminamos la variable
+
+# Probamos la misma variable con el TARGET diferenciando los que tienen y no tienen NAs
+df1$IDEA_price_rent_residential <- ifelse(is.na(df$IDEA_price_rent_residential), "YES", "NO")
+sum(df1$IDEA_price_rent_residential == "YES") #coincide con los NAs, está bien hecho
+
+df1 %>%
+  ggplot(aes(x = IDEA_price_rent_residential, y = TARGET, fill=IDEA_price_rent_residential)) +
+  geom_bar(stat="summary", fun.y="mean")
+# Eliminamos la variable
 
 
 ############################
@@ -554,7 +720,15 @@ df1 %>% filter(IDEA_stock_rent_residential<900) %>%
   ggplot(aes(x = IDEA_stock_rent_residential, y = TARGET)) +
   geom_point(alpha=0.1) +
   geom_smooth(method = "loess", se = F)
-# eliminamos la variable
+
+# Probamos la misma variable con el TARGET diferenciando los que tienen y no tienen NAs
+df1$IDEA_stock_rent_residential <- ifelse(is.na(df$IDEA_stock_rent_residential), "YES", "NO")
+sum(df1$IDEA_stock_rent_residential == "YES") #coincide con los NAs, está bien hecho
+
+df1 %>%
+  ggplot(aes(x = IDEA_stock_rent_residential, y = TARGET, fill=IDEA_stock_rent_residential)) +
+  geom_bar(stat="summary", fun.y="mean")
+# Eliminamos la variable
 
 
 ############################
@@ -583,7 +757,15 @@ df1 %>% filter(IDEA_demand_rent_residential !=0) %>%
   ggplot(aes(x = IDEA_demand_rent_residential, y = TARGET)) +
   geom_point(alpha=0.1) +
   geom_smooth(method = "loess", se = F)
-# eliminamos la variable
+
+# Probamos la misma variable con el TARGET diferenciando los que tienen y no tienen NAs
+df1$IDEA_demand_rent_residential <- ifelse(is.na(df$IDEA_demand_rent_residential), "YES", "NO")
+sum(df1$IDEA_demand_rent_residential == "YES") #coincide con los NAs, está bien hecho
+
+df1 %>%
+  ggplot(aes(x = IDEA_demand_rent_residential, y = TARGET, fill=IDEA_demand_rent_residential)) +
+  geom_bar(stat="summary", fun.y="mean")
+# Eliminamos la variable
 
 
 
@@ -612,6 +794,8 @@ df1$GA_page_views <- log1p(df$GA_page_views)
 
 # tiene una mejor distribución
 hist(df1$GA_page_views)
+
+
 
 
 ############################
