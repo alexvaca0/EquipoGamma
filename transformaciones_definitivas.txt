@@ -5,8 +5,32 @@
 
 3. Variable HY_metros_totales; los valores ausentes los podemos rellenar por medianas agrupando por provincia y tipo de inmobiliario. Son solo 34, podría valer. Adicionalmente, transformamos a logaritmo!
 
-4. 
-5. 
-6.
-7. 
-8.
+4. HY_metros_utiles: ELIMINAMOS. 
+
+5. HY_numero_banos: los que sean muy alejados, en caso de ser de tipo piso o similar, meterles el valor de la mediana para ese tipo de inmuebles (un edificio turístico si me creo que pueda tener 99 baños; un piso ni loco). 
+Adicionalmente, SACAMOS EL LOGARITMO!!!
+
+6.HY_precio: la metemos, SACANDO EL LOGARITMO. Posibilidad de incluir variable precio/m^2; puede ser más explicativa (casi seguro), aunque un modelo como xgboost, NN o RF van a captar esa relación casi seguro (pero si se la damos al modelo nosotros igual es mejor -- HABLAR). 
+
+7. HY_precio_anterior: la eliminamos; muchísimas filas con Nas y no se puede sacar relación de baja_precio ~ TARGET. 
+
+8. HY_cert_energ: ponemos en aquellas filas que esta variable = "", la ponemos = "B" (explicado en script exploratorio); la introducimos como categórica. 
+
+9. HY_num_terrzas: la pasamos a binaria (tiene-no tiene terraza). Es más clara la relación así que cuando cogemos todos los valores (pocas observaciones para 3, 4 terrazas; mejor agregado). 
+
+10. HY_ascensor: la dejamos de momento, aunque parece bastante claro que no hay relación, dejaremos que sea un método más sofisticado el que nos diga si existe o no relación aquí. 
+
+11. HY_trastero: aunque no hay relación clara, la dejamos, pues puede ser que en conjunto con otras variables sí pueda predecir el target. Por ejemplo, en la mayoría de las casas a la gente le dará igual si tiene trastero, pero en un chalet seguramente sí tenga importancia. 
+
+12. HY_num_garajes: la pasamos a binaria (tiene - no tiene garaje). 
+
+13. IDEA_area: podemos dejarla e imputar los valores ausentes con la media (o mediana) por tipo de inmueble y provincia, o podemos eliminarla directamente, ya que no parece tener mucha relación con el target. Mi opinión: ELIMINAR. Con 2631 valores ausentes nos estamos inventando 1/3 parte de los datos, y no parece haber relación...
+
+14. IDEA_poblacion: yo no la incluiría, por más transformaciones que le hago no parece ser en absoluto relevante; además está llena de NAs. 
+
+15. IDEA_densidad: lo mismo que población.
+
+16. Variables IDEA_pc_****: vemos que las mismas 2710 observaciones son constantes en todas estas variables; tenemos varias opciones. 1: binario casa nueva-vieja, contando los NAs como casa nueva; 2: binario casa nueva-vieja, contando los NAs como casa vieja; 3: binario isna-no, simplemente diciendo si es ausente o no el valor. ******* HABLAR ESTO!!!!******* (LÍNEAS 596-766 DEL CÓDIGO DE EXPLORATORIO). 
+
+
+
