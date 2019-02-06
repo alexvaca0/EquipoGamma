@@ -765,7 +765,33 @@ df1 %>%
   summarise(target = mean(TARGET))
 #algo menos de diferencia... igual lo mejor sería quedarse con la segunda opción. 
 
+#####ANTIGUEDAD#####
 
+summary(df1$HY_antiguedad)
+
+df1 %>%
+  
+  ggplot(aes(x = HY_antiguedad, y = TARGET)) +
+  
+  geom_point()
+
+
+df1$antiguedad_conocida <- ifelse(!is.na(df1$HY_antiguedad), 1, 0)
+
+df1 %>%
+  
+  group_by(antiguedad_conocida, HY_tipo) %>%
+  
+  ggplot(aes(x = antiguedad_conocida, y = TARGET, color = HY_tipo)) +
+  
+  geom_point() + geom_jitter()
+
+df1 %>%
+  
+  group_by(antiguedad_conocida) %>%
+  
+  summarise(target = mean(TARGET))
+#no hay absolutamente ninguna diferencia entre si se conoce la antiguedad de la casa o no...
 
 
 # SACAR DATOS FINALES PARA MODELIZAR Y REALIZACIÓN DE CLUSTERING----
