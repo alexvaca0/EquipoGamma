@@ -32,7 +32,27 @@ Adicionalmente, SACAMOS EL LOGARITMO!!!
 
 16. Variables IDEA_pc_****: vemos que las mismas 2710 observaciones son constantes en todas estas variables; tenemos varias opciones. 1: binario casa nueva-vieja, contando los NAs como casa nueva; 2: binario casa nueva-vieja, contando los NAs como casa vieja; 3: binario isna-no, simplemente diciendo si es ausente o no el valor. ******* HABLAR ESTO!!!!******* (LÍNEAS 596-766 DEL CÓDIGO DE EXPLORATORIO). 
 
+
 17. HY_antiguedad: por mí la eliminamos, haciendo varias pruebas y segmentando no he sido capaz de ver patrones claros... y hay más de 5000 valores ausentes. Una posibilidad sería segmentar por estos valores ausentes, pero ya os digo que no se ven patrones claros incluso en ese caso. 
+
+18. IDEA_pc_comercio: ELIMINAMOS. 
+
+19. IDEA_pc_industria: la pasamos a binaria! (isna or is notna)
+
+20. IDEA_pc_oficina: la pasamos a binaria isna or is not na.
+
+21. IDEA_pc_otros: la pasamos a binaria isna or is not na. 
+
+22. IDEA_pc_residencial: ELIMINAMOS. 
+
+23. IDEA_pc_trast_parking: ELIMINAMOS. 
+
+24. IDEA_ind_tienda: pasamos a binaria (isna or isnotna).
+
+25. IDEA_ind_turismo: ELIMINAMOS
+
+26. IDEA_ind_liquidez: la metemos como binaria (is or is not na).
+
 
 
 

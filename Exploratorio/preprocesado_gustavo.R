@@ -9,14 +9,14 @@ library(ggplot2)
 library(outliers)
 
 
-df <- fread('Estimar_UH2019.txt', encoding = 'UTF-8')
+#df <- fread('Estimar_UH2019.txt', encoding = 'UTF-8')
 df <- fread('Modelar_UH2019.txt', encoding = 'UTF-8')
 
 #df1 es el dataframe que iré modificando
 df1 <- df
 
-rm(list=ls())
-rm(df)
+#rm(list=ls())
+#rm(df)
 
 unique(df$HY_provincia)
 
@@ -119,6 +119,17 @@ df1 %>%
   geom_point(alpha=0.1)
 
 
+df1$comercio_na <- ifelse(is.na(df1$IDEA_pc_comercio), 1, 0)
+
+df1 %>%
+  
+  group_by(comercio_na) %>%
+  
+  summarise(target = mean(TARGET))
+  
+  ggplot(aes(x = comercio_na, y = TARGET)) +
+  geom_point()
+
 
 ############################
 # df$IDEA_pc_industria df[,28]
@@ -143,6 +154,19 @@ df1 %>%
   geom_smooth(method = "loess", se = F)
 # pendiente
 
+df1$indus_na <- ifelse(df1$IDEA_pc_industria, 1, 0)
+
+df1 %>%
+  
+  group_by(indus_na, HY_tipo) %>%
+  
+  summarise(target = mean(TARGET)) %>%
+  
+  ggplot(aes(x = indus_na, y = target, color = HY_tipo)) +
+  
+  geom_point()
+
+
 ############################
 # df$IDEA_pc_oficina df[,29]
 ############################
@@ -165,6 +189,20 @@ df1 %>%
   geom_point(alpha=0.1) +
   geom_smooth(method = "loess", se = F)
 # pendiente
+
+df1$naofic <- ifelse(is.na(df1$IDEA_pc_oficina), 1, 0)
+
+
+df1 %>%
+  
+  group_by(naofic, HY_tipo) %>%
+  
+  summarise(target = mean(TARGET)) %>%
+  
+  ggplot(aes(x = naofic, y = target, color = HY_tipo)) +
+  
+  geom_point()
+
 
 ############################
 # df$IDEA_pc_otros df[,30]
@@ -189,6 +227,19 @@ df1 %>%
 
 # Eliminar variable
 
+
+df1$otrosna <- ifelse(is.na(df1$IDEA_pc_otros), 1, 0 )
+
+df1 %>%
+  
+  group_by(otrosna, HY_tipo) %>%
+  
+  summarise(target = mean(TARGET)) %>%
+  
+  ggplot(aes(x = otrosna, y = target, color = HY_tipo)) +
+  
+  geom_point()
+
 ############################
 # df$IDEA_pc_residencial df[,31]
 ############################
@@ -205,10 +256,19 @@ summary(df$IDEA_pc_residencial)
 # no hay relación con la variable TARGET
 df1 %>%
   ggplot(aes(x = IDEA_pc_residencial, y = TARGET)) +
-  geom_point(alpha=0.1) +
+  geom_point(alpha=1) +
   geom_smooth(method = "loess", se = F)
 
 # eliminamos la variable
+
+df1$resid <- ifelse(df1$IDEA_pc_residencial < 0.375 | df1$IDEA_pc_residencial > 0.675, 0, 1)
+
+df1 %>%
+  
+  group_by(resid) %>%
+  
+  summarise(target = mean(TARGET))
+
 
 ############################
 # df$IDEA_pc_trast_parking df[,32]
@@ -228,6 +288,8 @@ df1 %>%
   geom_point(alpha=0.1) +
   geom_smooth(method = "loess", se = F)
 # eliminamos la variable
+
+
 
 ############################
 # df$IDEA_ind_tienda df[,33]
@@ -250,6 +312,18 @@ df1 %>%
   geom_point(alpha=0.1) +
   geom_smooth(method = "loess", se = F)
 # eliminamos la variable
+
+df1$tiendaNa <- ifelse(is.na(df1$IDEA_ind_tienda), 1, 0)
+
+df1 %>%
+  
+  group_by(tiendaNa, HY_tipo) %>%
+  
+  summarise(target = mean(TARGET)) %>%
+  
+  ggplot(aes(x = tiendaNa, y = target, color = HY_tipo)) +
+  
+  geom_point()
 
 
 ############################
@@ -274,6 +348,17 @@ df1 %>%
   geom_smooth(method = "loess", se = F)
 # eliminamos la variable
 
+df1$turismona <- ifelse(is.na(df1$IDEA_ind_turismo), 1, 0)
+
+df1 %>%
+  
+  group_by(turismona, HY_tipo) %>%
+  
+  summarise(target = mean(TARGET)) %>%
+  
+  ggplot(aes(x = turismona, y = target, color = HY_tipo)) +
+  
+  geom_point()
 
 
 ############################
@@ -385,6 +470,18 @@ df1 %>%
   geom_point(alpha=0.1) +
   geom_smooth(method = "loess", se = F)
 # eliminamos la variable
+
+df1$liquidezNA <- ifelse(is.na(df1$IDEA_ind_liquidez), 1, 0)
+
+df1 %>%
+  
+  group_by(liquidezNA, HY_tipo) %>%
+  
+  summarise(target = mean(TARGET)) %>%
+  
+  ggplot(aes(x = liquidezNA, y = target, color = HY_tipo)) +
+  
+  geom_point()
 
 
 ############################
@@ -630,7 +727,7 @@ tail(table(df$GA_mean_bounce))
 # Hay 123 entradas donde el usuario abandona sin interactuar con la web
 
 df1 %>%
-  ggplot(aes(x = GA_mean_bounce, y = TARGET)) +
+  ggplot(aes(x = log1p(GA_mean_bounce), y = TARGET)) +
   geom_point(alpha=0.1) +
   geom_smooth(method = "loess", se = F)
 
