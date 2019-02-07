@@ -6,6 +6,14 @@ library(outliers)
 
 df <-  fread('Modelar_UH2019.txt', encoding = 'UTF-8')
 
+provincias <- fread('provincias.csv', encoding = "UTF-8")
+
+names(df)[3] <- "provincia"
+
+df <- left_join(df, provincias, by = "provincia")
+
+names(df)[3] <- "HY_provincia"
+
 str(df)
 
 names(df)[1:25]
@@ -23,9 +31,21 @@ df %>%
   
   summarise(media_target = mean(TARGET)) %>%
   
-  ggplot(aes(x = HY_provincia, y = media_target)) +
+  ggplot(aes(x = reorder(HY_provincia, media_target), y = media_target)) +
+  geom_bar(stat = 'identity')+
+  coord_flip()
+
+df %>%
   
-  geom_point()
+  group_by(ccaa) %>%
+  
+  summarise(media_target = mean(TARGET)) %>%
+  
+  ggplot(aes(x = reorder(ccaa, media_target), y = media_target)) +
+  
+  geom_bar(stat = "identity") +
+  
+  coord_flip()
 
 
 ggplot(df, aes(x = TARGET, fill = HY_provincia)) +
@@ -41,11 +61,16 @@ df %>%
   
   summarise(media_target = mean(TARGET)) %>%
   
-  ggplot(aes(x = HY_tipo, y = media_target)) +
+  ggplot(aes(x = reorder(HY_tipo, media_target), y = media_target)) +
   
-  geom_point()
+  geom_bar(stat = "identity") +
+  
+  coord_flip()
+
 ##De nuevo, parece que hay diferencias en el tiempo de media que la gente pasa viendo
 ## la página en función del tipo de vivienda que sea. 
+
+sum(is.na(df$HY_tipo)) #sin ningún valor ausente!.
 
 df %>%
   
@@ -59,6 +84,8 @@ boxplot(df$HY_metros_totales)
 
 outlier(df$HY_metros_totales)
 
+
+
 #df1 <-  df[df$HY_metros_totales != 1820000, ]
 df1 <- df
 
@@ -71,7 +98,7 @@ df1 %>%
 
 #Vale, esto está mucho mejor. Decidimos entonces sacar el logaritmo de esta varable para que nos salgan cosas razonables.
 
-df1[df1$HY_tipo ] 
+df1 %>% 
   
   ggplot(aes(x = log1p(HY_metros_totales), y = log1p(TARGET), color = HY_tipo)) +
   
@@ -79,7 +106,67 @@ df1[df1$HY_tipo ]
   
   geom_smooth(method="loess", se = T)
 
+sum(is.na(df1$HY_metros_totales))
+
+df1 %>%
+  
+  ggplot(aes(x = log1p(HY_metros_totales), y = TARGET)) +
+  
+  geom_point()
+
+
+
 #Además, hay que tomar decisiones con los 0's, entre otras cosas, además de con los valores ausentes. 
+
+metros_agrupados <- df1 %>%
+  
+  group_by(HY_provincia, HY_tipo) %>%
+  
+  summarise(mediana = median(HY_metros_totales, na.rm = T))
+
+fill_metros <- function(df = df1, grouped = metros_agrupados) {
+  
+  new <- df
+  
+  for(i in 1:nrow(new)) {
+    
+    if(is.na(new[i, 'HY_metros_totales'])) {
+      
+      if(!is.na(grouped[which(grouped$HY_provincia == new$HY_provincia[i] & grouped$HY_tipo == new$HY_tipo[i]), 'mediana'])){
+        
+        valor <- grouped[which(grouped$HY_provincia == new$HY_provincia[i] & grouped$HY_tipo == new$HY_tipo[i]), 'mediana']
+        
+        new[i, 'HY_metros_totales'] <- valor
+        
+      } else {
+        
+        newgr <- data.frame(new %>%
+          
+          group_by(HY_tipo) %>%
+          
+          summarise(mediana = median(HY_metros_totales, na.rm=T)) )
+        
+        valor <- newgr[which(newgr$HY_tipo == new$HY_tipo[i]), 'mediana']
+        
+        new[i, 'HY_metros_totales'] <- valor
+        
+      }
+      
+    } else {
+      
+      next
+    }
+    
+  }
+  
+  return(new)
+}
+
+df1 <- fill_metros()
+
+sum(is.na(df1$HY_metros_totales))
+
+
 
 df1$HY_metros_totales <- log1p(df1$HY_metros_totales)
 
@@ -101,9 +188,12 @@ df1 %>%
 
 #como hay muchísimos valores ausentes para esta variable, vamos a meterle en los NA el valor de los metros totales
 
-df1[is.na(df1$HY_metros_utiles), 'HY_metros_utiles'] <- df1$HY_metros_totales[is.na(df1$HY_metros_utiles)]
+#df1[is.na(df1$HY_metros_utiles), 'HY_metros_utiles'] <- df1$HY_metros_totales[is.na(df1$HY_metros_utiles)]
 
-df1$HY_metros_utiles <- log1p(df1$HY_metros_utiles)
+
+df1$HY_metros_utiles <- NA
+
+#df1$HY_metros_utiles <- log1p(df1$HY_metros_utiles)
 
 ### Distribución ###
 
@@ -123,7 +213,21 @@ df1 %>%
 boxplot(df1$HY_num_banos)
 #Hay una casa en la que pone que hay 100 baños... No me cuadra. 
 
-df1[df1$HY_num_banos == max(df1$HY_num_banos), c("HY_precio", "TARGET")]
+df1[df1$HY_num_banos == max(df1$HY_num_banos), c("HY_num_banos", "HY_precio", "TARGET", "HY_tipo", "IDEA_area")]
+
+#viendo esto, me parece evidente que no todos estos edificios pueden tener 99 baños; especialmente no los pisos.
+
+df1 %>%
+  
+  group_by(HY_tipo) %>%
+  
+  summarise(banos = median(HY_num_banos))
+
+
+df1[df1$HY_num_banos == 99 & df1$HY_tipo == "Piso", "HY_num_banos"] <- 1
+
+
+summary(df1$HY_num_banos)
 
 #una forma de solucionar este problema con el número de baños sería sacar el logaritmo
 
@@ -150,7 +254,39 @@ df1 %>%
   
   geom_point() +
   
-  geom_smooth(method = "lm", se = F)
+  geom_smooth(method = "lm", se = F) 
+
+##### PRECIO ANTERIOR ####
+
+sum(is.na(df1$HY_precio_anterior)) #tiene muchísimos valores ausentes...
+
+df1$bajado_precio <- ifelse(df1$HY_precio < df1$HY_precio_anterior, 1, 0)
+
+df1$bajado_precio[is.na(df1$bajado_precio)] <- 0
+
+df1 %>%
+  
+  group_by(bajado_precio) %>%
+  
+  ggplot(aes(x = bajado_precio, y = TARGET)) +
+  
+  geom_point() +
+  
+  geom_jitter()
+
+df1 %>%
+  
+  group_by(bajado_precio) %>%
+  
+  summarise(target = mean(TARGET)) %>%
+  
+  ggplot(aes(x = bajado_precio, y = target)) +
+  
+  geom_bar(stat = "identity") +
+  
+  coord_flip()
+
+#parece apenas haber diferencias... no merece la pena incluir esta variable. 
 
 
 ###HY_cert_energ###
@@ -170,7 +306,10 @@ df1 %>%
 
 #Parece que si existe una diferencia en la media del target en función de la certificación energética
 
-df1$HY_cert_energ[df1$HY_cert_energ == ""] <- "no"
+# utilizando este link https://ovacen.com/certificado-energetico/ 
+#yo diría de pasar la certificación energética "" a B, porque todos los inmuebles están obligados a tener una. 
+
+df1$HY_cert_energ[df1$HY_cert_energ == ""] <- "B"
 
 df1$HY_cert_energ <- as.factor(df1$HY_cert_energ)
 
@@ -201,8 +340,27 @@ df1 %>%
   
   geom_point()
 
-
 #vale, ahí si vemos una relación clara; las casas con terraza se ven más. 
+
+
+df1 %>%
+  
+  group_by(tiene_terraza) %>%
+  
+  ggplot(aes(x = tiene_terraza, y = TARGET)) +
+  
+  geom_point() #sin embargo cuando vemos todas las observaciones no queda tan claro...
+
+
+df1 %>%
+  
+  group_by(tiene_terraza) %>%
+  
+  summarise(target = median(TARGET)) %>%
+  
+  ggplot(aes(x = tiene_terraza, y = target)) +
+  
+  geom_point()
 
 ### HY_ascensor###
 
@@ -219,14 +377,17 @@ df1 %>%
   
   group_by(HY_ascensor) %>%
   
-  summarise(target = mean(TARGET)) %>%
+  filter(HY_tipo == "Piso") %>%
   
+  summarise(target = median(TARGET)) %>%
   
   ggplot(aes(x = HY_ascensor, y = target)) +
   
   geom_point()
 
+
 #aquí las diferencias si nos fijamos bien son muy pequeñas entre las casas con y sin ascensor. 
+#ni siquiera son significativas cuando le metemos el filtro de piso...
 
 ####Trastero####
 
@@ -242,7 +403,18 @@ df1%>%
   ggplot(aes(x = HY_trastero, y = target)) +
   
   geom_point()
+
 #alguna diferencia aunque tampoco demasiado significativas; la gente mira algo más las casas con trastero.
+
+sum(is.na(df1$HY_trastero))
+
+df1 %>%
+  group_by(HY_trastero) %>%
+  
+  ggplot(aes(x = HY_trastero, y = TARGET)) +
+  
+  geom_point() +
+  geom_jitter()
 
 
 ### HY_num_garajes ####
@@ -265,19 +437,38 @@ df1 %>%
 #las diferencias son mayores entre tener 0 o 1 garajes que entre 1 y 2... 
 #cuando veáis esto, decid si os parece mejor pasarlo a 0,1 o dejarlo como está. 
 
+
+df1 %>%
+  
+  group_by(HY_num_garajes) %>%
+  
+  ggplot(aes(x = HY_num_garajes, y = TARGET)) +
+  
+  geom_point() + geom_jitter()
+
 df1$tiene_garaje <- ifelse(df1$HY_num_garajes > 0, 1, 0)
 
 df1 %>%
   
   group_by(tiene_garaje) %>%
   
-  summarise(target = mean(TARGET)) %>%
+  summarise(target = median(TARGET)) %>%
   
   ggplot(aes(x = tiene_garaje, y = target)) +
   
   geom_point()
 
+
 #aquí vemos unas diferencias más significativas...
+
+df1 %>%
+  
+  group_by(tiene_garaje) %>%
+  
+  ggplot(aes(x = tiene_garaje, y = TARGET)) +
+  
+  geom_point()
+
 
 summary(df1$tiene_garaje)
 #solo el 9,6% de las casas tienen garaje, por lo que puede ser una buena idea dejarlo en variable binaria.
@@ -330,7 +521,16 @@ df1 %>%
 
 
 #al haber diferencias significativas por provincia, una buena idea para imputar NAs puede ser imputarlos por provincia
-#tambien hay diferencias significativas por tipo de casa...; vamos a usar esto también 
+#tambien hay diferencias significativas por tipo de casa...; vamos a usar esto también
+
+df1 %>%
+  
+  ggplot(aes(x = log1p(IDEA_area), y = TARGET)) +
+  
+  geom_point()
+
+sum(is.na(df1$IDEA_area))
+
 
 area_por_provincia <- data.frame(df1 %>%
   
@@ -362,7 +562,7 @@ df2 <- fill_area_nas()
 
 sum(is.na(df2$IDEA_area))
 
-#Vale, ahora ya lo tenemos limpio de NAs.
+#Vale, ahora ya lo tenemos casi limpio de NAs.
 
 hist(log1p(df1$IDEA_area))
 hist(log1p(df2$IDEA_area))
@@ -372,11 +572,11 @@ hist(log1p(df2$IDEA_area))
 
 df1 %>%
   
-  ggplot(aes(x = IDEA_poblacion, y = TARGET)) +
+  ggplot(aes(x = IDEA_poblacion^2, y = log1p(TARGET))) +
   
   geom_point() +
   
-  geom_smooth(method = "lm", se = T)
+  geom_smooth(method = "loess", se = T)
 
 #nada, parece que la población no afecta al target...
 #igual no es necesario meter poblacion...
@@ -402,6 +602,199 @@ hist(df1$IDEA_pc_1960)
 hist(log1p(df1$IDEA_pc_1960)) #lo normaliza un poco...
 
 #pero tampoco mucho.
+
+
+df1 %>%
+  
+  ggplot(aes(x = log1p(IDEA_pc_1960), y = TARGET)) +
+  
+  geom_point()
+
+
+df1 %>%
+  
+  ggplot(aes(x = IDEA_pc_1960_69, y = TARGET)) +
+  
+  geom_point() +
+  
+  geom_smooth(method = "loess", se = T)
+
+df1 %>%
+  
+  ggplot(aes(x = IDEA_pc_1970_79, y = TARGET)) +
+  
+  geom_point() +
+  
+  geom_smooth(method = "loess", se = F)
+
+
+df1 %>%
+  
+  ggplot(aes(x = IDEA_pc_1980_89, y = TARGET)) +
+  
+  geom_point() +
+  
+  geom_smooth(method = "loess", se = F)
+
+
+df1 %>%
+  
+  ggplot(aes(x = IDEA_pc_1990_99, y = TARGET)) +
+  
+  geom_point() +
+  
+  geom_smooth(method = "loess", se = F)
+
+df1 %>%
+  
+  ggplot(aes(x = IDEA_pc_2000_10, y = TARGET)) +
+  
+  geom_point() +
+  
+  geom_smooth(method = "loess", se = F)
+
+#en todas se repiten los mismos 2710 valores ausentes...
+
+casas_nuevas <- c()
+
+for(i in 1:nrow(df1)) {
+  
+  if(is.na(df1$IDEA_pc_1960[i])){
+    
+    casas_nuevas <- c(casas_nuevas, 1)
+  } else {
+  
+  
+    if(df1$IDEA_pc_1960[i] <= 0.10 & df1$IDEA_pc_1960_69[i] <= 0.20 
+      & df1$IDEA_pc_1970_79[i] <= 0.20 & df1$IDEA_pc_1980_89[i] <= 0.25
+      & df1$IDEA_pc_1990_99[i] <= 0.30 & df1$IDEA_pc_2000_10[i] <= 0.75) {
+    
+      casas_nuevas <- c(casas_nuevas, 1)
+    
+  } else {
+    
+    casas_nuevas <- c(casas_nuevas, 0)
+    
+    
+  }
+  
+  }
+}
+
+df1$nueva <- casas_nuevas
+
+df1 %>%
+  
+  group_by(nueva) %>%
+  
+  ggplot(aes(x = nueva, y = TARGET)) +
+  
+  geom_point()
+
+#la alternativa es tratar los NAs como si se trataran de casas antiguas (0). 
+
+casas_nuevas2 <- c()
+
+
+for(i in 1:nrow(df1)) {
+  
+  if(is.na(df1$IDEA_pc_1960[i])){
+    
+    casas_nuevas2 <- c(casas_nuevas2, 0)
+    
+  } else {
+    
+    
+    if(df1$IDEA_pc_1960[i] <= 0.10 & df1$IDEA_pc_1960_69[i] <= 0.20 
+       & df1$IDEA_pc_1970_79[i] <= 0.20 & df1$IDEA_pc_1980_89[i] <= 0.25
+       & df1$IDEA_pc_1990_99[i] <= 0.30 & df1$IDEA_pc_2000_10[i] <= 0.75) {
+      
+      casas_nuevas2 <- c(casas_nuevas2, 1)
+      
+    } else {
+      
+      casas_nuevas2 <- c(casas_nuevas2, 0)
+      
+      
+    }
+    
+  }
+}
+
+
+df1$nuevas2 <- casas_nuevas2
+
+df1 %>%
+  
+  group_by(nuevas2) %>%
+  
+  ggplot(aes(x = nuevas2, y = TARGET)) +
+  
+  geom_point() + geom_jitter()
+
+#parece que el grupo en el que pongamos los NAs es determinante; también podríamos agrupar por esto...
+
+df1$IDEA_pc_isna <- ifelse(is.na(df1$IDEA_pc_1960), 1, 0)
+
+df1 %>%
+  
+  group_by(IDEA_pc_isna) %>%
+  
+  ggplot(aes(x = IDEA_pc_isna, y = TARGET)) +
+  
+  geom_point()
+
+df1 %>%
+  
+  group_by(nueva) %>%
+  
+  summarise(target = mean(TARGET))
+#apenas hay diferencias en este caso...
+
+df1 %>%
+  
+  group_by(nuevas2) %>%
+  
+  summarise(target = mean(TARGET))
+#algo más de diferencia...
+
+df1 %>%
+  
+  group_by(IDEA_pc_isna) %>%
+  
+  summarise(target = mean(TARGET))
+#algo menos de diferencia... igual lo mejor sería quedarse con la segunda opción. 
+
+#####ANTIGUEDAD#####
+
+summary(df1$HY_antiguedad)
+
+df1 %>%
+  
+  ggplot(aes(x = HY_antiguedad, y = TARGET)) +
+  
+  geom_point()
+
+
+df1$antiguedad_conocida <- ifelse(!is.na(df1$HY_antiguedad), 1, 0)
+
+df1 %>%
+  
+  group_by(antiguedad_conocida, HY_tipo) %>%
+  
+  ggplot(aes(x = antiguedad_conocida, y = TARGET, color = HY_tipo)) +
+  
+  geom_point() + geom_jitter()
+
+df1 %>%
+  
+  group_by(antiguedad_conocida) %>%
+  
+  summarise(target = mean(TARGET))
+#no hay absolutamente ninguna diferencia entre si se conoce la antiguedad de la casa o no...
+
+
+# SACAR DATOS FINALES PARA MODELIZAR Y REALIZACIÓN DE CLUSTERING----
 
 X <- df1
 
@@ -514,3 +907,18 @@ X_c %>%
 X_c$gr <- NULL
 
 names(X_c)[ncol(X_c)] <- c("groups")
+
+
+X_c %>%
+  
+  group_by(groups) %>%
+  
+  summarise(target = mean(TARGET), num = n()) %>%
+  
+  ggplot(aes(x = groups, y = target, size = num) ) +
+  
+  geom_point()
+
+write.csv(X_c, "../datos_modelar/transformados01.csv", fileEncoding = "utf-8")
+
+
