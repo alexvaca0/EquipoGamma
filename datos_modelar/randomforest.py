@@ -16,11 +16,13 @@ from sklearn.preprocessing import MinMaxScaler
 
 from sklearn.preprocessing import StandardScaler
 
-data = pd.read_csv("transformados01.csv", encoding = "utf-8")
+from sklearn.model_selection import GridSearchCV
 
-data.drop('Unnamed: 0', axis = 1, inplace = True)
+data = pd.read_csv("transformados02.csv")
 
-data.drop('HY_cod_postal', axis = 1, inplace = True)
+#data.drop('Unnamed: 0', axis = 1, inplace = True)
+
+#data.drop('HY_cod_postal', axis = 1, inplace = True)
 
 datadic = {}
 
@@ -39,7 +41,7 @@ scaler_y = MinMaxScaler()
 
 y_scaled = scaler_y.fit_transform(y)
 
-X_train, X_test, y_train, y_test = train_test_split(X, y_scaled, 
+X_train, X_test, y_train, y_test = train_test_split(X, y, 
                                                     test_size = 0.2,
                                                     random_state = 7)
 
@@ -103,3 +105,29 @@ def train_forests():
     
 
 predicciones = train_forests()
+
+param_grid = {
+        
+        'n_estimators': [i for i in range(10, 1000, 10)],
+        'criterion': ['mae'],
+        'random_state': [7],
+        'max_depth': [i for i in range(1, 1000, 10)],
+        'min_samples_split': [i for i in range(2, 10, 1)],
+        'min_samples_leaf': [i for i in range(1, 10, 1)],
+        'n_jobs': [-1]}
+
+myrf = GridSearchCV(estimator = RandomForestRegressor(),
+                    param_grid=param_grid)
+
+myrf.fit(X_train, np.ravel(y_train))
+
+rf_predictions = myrf.predict(X_test)
+
+y_test1 = np.exp(y_test) - 1
+
+rf_pred1 = np.exp(rf_predictions) - 1
+
+mae = median_absolute_error(y_test1, rf_pred1)
+
+print(mae)
+

@@ -195,11 +195,20 @@ limpiar <- function(df = d_or) {
   
   #df[, c("HY_provincia", "HY_tipo", "HY_cert_energ")] <- NULL
   
+  TARGET <- df[, "TARGET"]
+  
+  df$TARGET <- NULL
+  
   df <- apply(df, 2, minmaxscaler)
+  
+  df <- cbind(df, TARGET)
   
   df <- data.frame(cbind(df, categoricas_dummy))
   
-  write.csv(df, 'transformados02.csv', row.names =F, col.names = T)
+  df <- df[complete.cases(df), ]
+  
+  write.csv(df, 'transformados02.csv', row.names =F, col.names = T,
+            fileEncoding = 'utf-8')
   
   write.csv(transformaciones, 'transformaciones_realizadas.csv', 
             row.names=F, col.names=F)
