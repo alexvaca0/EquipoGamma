@@ -53,6 +53,9 @@ Adicionalmente, SACAMOS EL LOGARITMO!!!
 
 26. IDEA_ind_liquidez: la metemos como binaria (is or is not na).
 
+27. IDEA_ind_riqueza: binaria isna.
+
+
 
 
 
