@@ -1,0 +1,15 @@
+IDEAS TEXTO
+
+- sacar la variable de si está en español o en otro idioma. 
+- Sacar la variable "piscina"
+- Sacar la variable "centro" o "centrica" (con regexpr)
+- longitud del texto
+- "amueblada"
+-"equipada"
+- "amplia"
+- sentiment polarity and subjectivity.
+- calefacción y aire acondicionado
+- solo mujeres (muy común jajajajaj xD)
+- "interior o exterior" (del piso). 
+- 'boardilla'
+<
