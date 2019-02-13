@@ -183,7 +183,13 @@ limpiar <- function(df = d_or) {
   data_imagenes=fread('../datos_originales/data_imagenes_por_casa.csv')
   data_imagenes=data_imagenes[data_imagenes$dataset=="Train",-34]
   
-  df=join(df, data_imagenes, by="HY_id", type="left", match="first")
+  #df=join(df, data_imagenes, by="HY_id", type="full", match="first")
+  
+  df = merge(df, data_imagenes, by = "HY_id", all.x = T)
+  
+  df[is.na(df)] <- 0
+  
+  #d[is.na(df)] <- 0
   
   df$HY_id <- NULL
   
