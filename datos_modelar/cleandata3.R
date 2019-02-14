@@ -195,6 +195,10 @@ limpiar <- function(df = d_or) {
   
   df$HY_cod_postal <- NULL
   
+  descripcion <- df$HY_descripcion
+  
+  distr <- df$HY_distribucion
+  
   df$HY_descripcion <- NULL
   
   df$HY_distribucion <- NULL
@@ -214,7 +218,11 @@ limpiar <- function(df = d_or) {
   
   df$TARGET <- NULL
   
-  df <- apply(df, 2, minmaxscaler)
+  df <- data.frame(apply(df, 2, minmaxscaler))
+  
+  df[,'descr'] <- descripcion
+  
+  df[, 'distr'] <- distr
   
   df <- cbind(df, TARGET)
   
@@ -222,7 +230,7 @@ limpiar <- function(df = d_or) {
   
   df <- df[complete.cases(df), ]
   
-  write.csv(df, 'transformados04.csv', row.names =F, col.names = T,
+  write.csv(df, 'transformados05.csv', row.names =F, col.names = T,
             fileEncoding = 'utf-8')
   
   write.csv(transformaciones, 'transformaciones_realizadas.csv', 
