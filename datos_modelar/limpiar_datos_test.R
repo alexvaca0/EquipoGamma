@@ -251,11 +251,26 @@ limpiar <- function(df = d_or) {
 new_df <- limpiar()
 
 
+datos_train <- fread('transformados06.csv', encoding = 'UTF-8')
+
+'%ni%' <- Negate('%in%') 
+
+
+for (name in names(datos_train)){
+  
+  if (name %ni% names(new_df)) {
+    
+    new_df[, name] <- 0
+    
+  }
+  
+}
 
 
 
 
-
+write.csv(new_df, 'test_data_limpio.csv', row.names =F, col.names = T,
+          fileEncoding = 'utf-8')
 
 
 
