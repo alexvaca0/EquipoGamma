@@ -267,10 +267,17 @@ for (name in names(datos_train)){
 }
 
 
+pos <- colnames(new_df) %in% colnames(datos_train)
 
 
-write.csv(new_df, 'test_data_limpio.csv', row.names =F, col.names = T,
+df_def = new_df[ , pos]
+
+df_def$TARGET <- NULL
+
+
+write.csv(df_def, 'test_data_limpio.csv', row.names =F, col.names = T,
           fileEncoding = 'utf-8')
+
 
 
 
