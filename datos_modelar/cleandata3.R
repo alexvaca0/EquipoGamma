@@ -222,7 +222,7 @@ limpiar <- function(df = d_or) {
   
   df <- df[complete.cases(df), ]
   
-  write.csv(df, 'transformados04.csv', row.names =F, col.names = T,
+  write.csv(df, 'transformados05.csv', row.names =F, col.names = T,
             fileEncoding = 'utf-8')
   
   write.csv(transformaciones, 'transformaciones_realizadas.csv', 
