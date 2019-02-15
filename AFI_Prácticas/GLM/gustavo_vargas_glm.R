@@ -3,8 +3,12 @@
 # Gustavo Eduardo Vargas Núñez
 ####################################
 
+
+#### Carga de datos ####
 library(data.table)
 library(MASS)
+library(ggplot2)
+
 
 Fair <- fread('Fair.csv')
 
@@ -26,6 +30,7 @@ summary(Fair)
 sum(is.na(Fair))
 # No hay NAs
 
+
 #### Tratamiento de variables ####
 
 Fair$V1 <- NULL
@@ -40,6 +45,7 @@ Fair$occupation <- factor(Fair$occupation, levels=c("1", "2", "3","4","5","6","7
 
 Fair$rate <- factor(Fair$rate, levels=c("1", "2", "3","4","5"), ordered=TRUE)
 
+
 #### Data partitioning ####
 
 set.seed(123)
@@ -48,13 +54,53 @@ train_ind <- sample(seq_len(nrow(Fair)),size=500)
 train <- Fair[train_ind, ]
 test <- Fair[-train_ind, ]
 
+
 #### GLM para 'nbaffairs' ####
 
 # Hay que hacer muchos gráficos para entender la relación de nuestra variable con el target
+table(Fair$nbaffairs)
+qplot(Fair$nbaffairs)  # conteo de número de affairs, pero solo tiene ciertas variables
+
+ggcorr(Fair, label = T)
+# vemos mucha relación entre la variable age y ym, lo cual tiene sentido, pero no con el target
+
+# Probamos una poisson sin más
+fit.poisson <- glm(nbaffairs ~ .,
+                   family = "poisson",
+                   data = train)
+summary(fit.poisson)
+AIC(fit.poisson)
+
+# Como la variable nbaffairs es un conteo, la modelaremos al principio como una poisson. Luego probaremos
+# si va mejor una quasi poisson y después, una binomial negativa. 
+
+# Como en la gráfica vemos que los ceros son mucho mayores que el resto de números, usaremos los modelos
+# anteriores dentro de un modelo de ceros inflados, donde la bernouilli es el modelo para los ceros.
+
+# ceros inflados seguro
+fit.zip1 <- zeroinfl(nbaffairs ~ .,
+                     dist = "poisson",
+                     data = train)
+summary(fit.zip1)
+AIC(fit.zip1) #1302.854, mucho menor que el del poisson
+
+# Probamos un ceros inflados con binomial negativa
+fit.zip2 <- zeroinfl(nbaffairs ~ .,
+                     dist = "negbin",
+                     data = train)
+summary(fit.zip2)
+AIC(fit.zip2) #1213.876, sigue mejorando
+
 
 
 #### GLM para 'rate' ####
+table(Fair$rate)
+qplot(Fair$rate)
+# hay que modelarla como una ordinal
 
+wine.plr <- polr(rate ~ .,
+                 data = train)
+pr <- profile(wine.plr)
 
 
 
@@ -72,7 +118,7 @@ test <- Fair[-train_ind, ]
 
 
 # nbaffairs es fácil sacar qué distribución es
-# Para rate es un poco más difícil saber qué tipo de distribución es
+# Para rate es un poco más difícil saber qué tipo de distribución es. Pero seguro que es una poisson
 
 # Note: variable 'rate' is ordinal, hence ordinal GLM is recommended, like MASS:polr
 
