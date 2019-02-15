@@ -64,12 +64,14 @@ qplot(Fair$nbaffairs)  # conteo de número de affairs, pero solo tiene ciertas v
 ggcorr(Fair, label = T)
 # vemos mucha relación entre la variable age y ym, lo cual tiene sentido, pero no con el target
 
-# Probamos una poisson sin más
+# Probamos una poisson sin más (sin ser ceros inflados)
 fit.poisson <- glm(nbaffairs ~ .,
                    family = "poisson",
                    data = train)
 summary(fit.poisson)
 AIC(fit.poisson)
+
+
 
 # Como la variable nbaffairs es un conteo, la modelaremos al principio como una poisson. Luego probaremos
 # si va mejor una quasi poisson y después, una binomial negativa. 
@@ -77,7 +79,7 @@ AIC(fit.poisson)
 # Como en la gráfica vemos que los ceros son mucho mayores que el resto de números, usaremos los modelos
 # anteriores dentro de un modelo de ceros inflados, donde la bernouilli es el modelo para los ceros.
 
-# ceros inflados seguro
+# ceros inflados con poisson
 fit.zip1 <- zeroinfl(nbaffairs ~ .,
                      dist = "poisson",
                      data = train)
@@ -90,6 +92,8 @@ fit.zip2 <- zeroinfl(nbaffairs ~ .,
                      data = train)
 summary(fit.zip2)
 AIC(fit.zip2) #1213.876, sigue mejorando
+
+
 
 
 
