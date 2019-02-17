@@ -1,9 +1,16 @@
-####################################
-# Práctica de GLM
-# Gustavo Eduardo Vargas Núñez
-####################################
+---
+title: "Práctica de Modelos Lineales Generalizados"
+author: "Gustavo Vargas"
+date: "17 de febrero de 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(eval=TRUE ,echo = TRUE, warning = FALSE, message=FALSE)
+```
 
 
+```{r, echo=FALSE}
 #### Carga de datos ####
 library(data.table)
 library(dplyr)
@@ -14,34 +21,34 @@ library(pscl)
 library(caret)
 library(effects)
 library(grid)
+library(gridExtra)
 
 rm(list = ls())
 
 Fair <- fread('Fair.csv')
+```
 
-names(Fair)
-# Datos de affairs en 1970. Número de engaños en la pareja en función:
-# 1.sex             hombre o mujer. Factor
-# 2.age             edad
-# 3.ym              años de casado
-# 4.chil            número de hijos. Factor.
-# 5.religious       si es religiosa. Del 1(antirreligiosa) al 5(muy religiosa)
-# 6.education       nivel de educación
-# 7.occupation      nivel de educación. Del 1 al 7
-# 8.rate            cómo es de feliz, del 1 al 5
-# 9.nbaffairs       target. Si ha habido infidelidad
+Vamos a analizar una base de datos sobre infidelidades creada en 1970, `Fair`, de 601 filas y 9 variables, que son:
 
+- 1 `sex`             Hombre o mujer. Factor
+- 2 `age`             Edad
+- 3 `ym`              Años de casado
+- 4 `chil`            Número de hijos. Factor.
+- 5 `religious`       Si es religiosa. Del 1(antirreligiosa) al 5(muy religiosa)
+- 6 `education`       Nivel de educación
+- 7 `occupation`      Nivel de educación. Del 1 al 7
+- 8 `rate`            Cómo es de feliz, del 1 al 5
+- 9 `nbaffairs`       Número de infidelidades
+
+En esta base de datos no hay NAs. Vamos a ver de qué tipo es cada variable, por si necesitamos hacer cambios
+```{r,echo=FALSE}
 str(Fair)
-summary(Fair)
-
-sum(is.na(Fair))
-# No hay NAs
+```
 
 
+Realizamos los cambios necesarios:
 
-
-#### Tratamiento de variables ####
-
+```{r}
 Fair$V1 <- NULL
 
 Fair$sex <- factor(Fair$sex)
@@ -53,47 +60,48 @@ Fair$religious <- factor(Fair$religious, levels=c("1", "2", "3","4","5"), ordere
 Fair$occupation <- factor(Fair$occupation, levels=c("1", "2", "3","4","5","6","7"), ordered=TRUE)
 
 Fair$rate <- factor(Fair$rate, levels=c("1", "2", "3","4","5"), ordered=TRUE)
+```
 
 
+## Data partitioning
 
-#### Data partitioning ####
+Partimos el dataset en train y test. Vamos a hacer en análisis con train, y pasaremos a usar el test solo en el apartado final, para predicción.
 
-# Partimos el dataset en train y test. Vamos a hacer en análisis con train, y pasaremos
-# a usar el test solo en el apartado final, para predicción.
-
+```{r,eval= TRUE, echo=TRUE, warning=FALSE, message=FALSE}
 set.seed(123)
 train_ind <- sample(seq_len(nrow(Fair)),size=500)
 
 ftrain <- Fair[train_ind, ]
 ftest <- Fair[-train_ind, ]
+```
 
 
 
-#### Análisis univariante ####
 
-####
-# ftrain$sex ftrain[,1]
-####
+## Análisis univariante
 
-qplot(ftrain$sex)
-summary(ftrain$sex)
-# Hay menos hombres, pero no muchos menos. Está bien balanceado.
-
-# La infidelidad media tampoco parece ser distinta por sexos
-ftrain %>%
+#### Variable `sex`
+```{r,echo=FALSE,fig.height=2}
+p1 <- qplot(ftrain$sex)
+p2 <- ftrain %>%
   group_by(sex) %>% 
   summarise(media_nbaffairs = mean(nbaffairs)) %>% 
   ggplot(aes(x = sex,
              y=media_nbaffairs,
              fill=sex)) +
   geom_histogram(stat='identity')
-
-# Hay más mujeres valorando su matrimonio que hombres, lo cual puede indicar que luego tengamos más
-# hombres siendo infieles.
-ftrain %>% 
+p3 <- ftrain %>% 
   ggplot(aes(x = rate,fill=sex))+
   geom_bar(position = "dodge")+
   facet_grid(~sex)
+
+grid.arrange(p1, p2, p3, nrow = 1)
+```
+
+- Hay menos hombres, pero no muchos menos. Está bien balanceado.
+- La infidelidad media, `median_nbaffairs` tampoco parece ser distinta por sexos
+- Las mujeres valoran más su matrimonio que los hombres, lo cual puede indicar que luego tengamos más hombres siendo infieles.
+
 
 
 ####

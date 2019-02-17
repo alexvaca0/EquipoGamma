@@ -1,4 +1,12 @@
-#Paquetes----
+####################################
+# Práctica de Regresión Avanzada
+# Gustavo Eduardo Vargas Núñez
+####################################
+
+# Paquetes----
+
+library(data.table)
+library(tidyverse)
 
 library(MASS)
 library(ISLR)
@@ -22,81 +30,110 @@ library(ggmap)
 library(het.test)
 library(lmtest)
 
-#Exploratorio y cambio en las variables----
 
-# id: identificador para cada casa.
-# date: fecha de venta de la casa.
-# price: precio de venta de la casa.
-# bedrooms: número de habitaciones.
-# bathrooms: número de baños (puede que haya .5 baños que representarían baños con váter pero no ducha).
-# sqft_living: pies cuadrados del interior de una casa.
-# sqft_lot: pies cuadrados de terreno de una casa.
-# floors: número de plantas de una casa.
-# waterfront: variable dummy que vale 1 si la casa está enfrente del mar.
-# view: índice de 0 a 4 indicando como de buenas son las vistas.
-# condition: índice de 1 a 5 indicando como de buenas son las condiciones de las casas.
-# grade: índice de 1 a 13 indicando el grado de construcción y diseño de la casa (de 1-3 mala construcción y diseño, 7 nivel medio de construcción y diseño y de 11-13 muy buena construcción y diseño).
-# sqft_above: los pies cuadrados del espacio de la vivienda interior que está por encima del nivel del suelo.
-# sqft_basement: pies cuadrados del sotano de una casa.
-# yr_built: año de construcción de la casa.
-# yr_renovated: año de renovación de la casa.
-# zipcode: código postal de la casa.
-# lat: latitud.
-# long: longitud.
-# sqft_living15: pies cuadrados del interior de las casas de los 15 vecinos más próximos.
-# sqft_lot15: pies cuadrados del terreno de las casas de los 15 vecinos más próximos.
+# Exploratorio y cambio en las variables----
 
-setwd("C:/Users/aolle/Desktop/regresion avanzada")
-data <- read_csv('Data/HomeSalesData.csv')
+setwd("C:/Users/gvargas/00 - Máster Data Science AFI/19 - Regresión Avanzada/03 - Práctica")
+
+data <- fread('HomeSalesData.csv')
+
+names(data)
+str(dat)
+# id:           Índice
+# date:         Fecha de venta
+# price:        Precio de venta
+# bedrooms:     Número de habitaciones
+# bathrooms:    Número de baños. Si bathrooms = 0.5, solo hay váter, no ducha.
+# sqft_living:  M2 útiles
+# sqft_lot:     M2 totaltes
+# floors:       Número de pisos
+# waterfront:   Binaria igual a 1 si está en primera línea de playa
+# view:         Factor de 0 a 4, de menor a mayor calidad de las vistas
+# condition:    Factor de 1 a 5, de peor a mejor condiciones de las casas.
+# grade:        Factor de 1 a 13, de peor a mejor calidad y diseño
+# sqft_above:   M2 útiles sobre rasante.
+# sqft_basement:M2 de planta baja
+# yr_built:     Año de construcción
+# yr_renovated: Año de rehabilitación
+# zipcode:      Código postal
+# lat:          Latitud
+# long:         Longitud
+# sqft_living15:M2 útiles de los 15 vecinos más cercanos
+# sqft_lot15:   M2 totales de los 15 vecinos más cercanos
+
+
+# Transformación de variables ----
+
 data$waterfront <- as.factor(data$waterfront)
 data$view <- as.factor(data$view)
 data$condition <- as.factor(data$condition)
-
-renovado_si_no <- function(year){
-  if (is.na(year)) {return(NA)}
-  else if (year == 0 ) {return(0)}
-  else if(year < 1995) {return(1)}
-  else{return(2)}
-}
-
-data$yr_renovated <- as.factor(sapply(data$yr_renovated, renovado_si_no))
-
-viejo.nuevo <- function(year){
-  if (is.na(year)) {return(NA)}
-  else if (year <= 1985 ) {return(0)}
-  else if(year >1985 & year < 2010) {return(1)}
-  else if(year>= 2010) {return(2)}
-}
-data$yr_built <- as.factor(sapply(data$yr_built, viejo.nuevo))
 data$zipcode <- as.factor(data$zipcode)
 data$sqft_basement <- factor(ifelse(data$sqft_basement>0,1,0))
-data <- data[,-c(1,2)] #Se elimina id y año
+data <- data[,-c(1,2)]
+
+data$yr_renovated <- as.factor(ifelse(is.na(data$yr_renovated), NA,
+                                      ifelse(data$yr_renovated== 0, 0,
+                                             ifelse(data$yr_renovated < 1995, 1, 2))))
+
+data$yr_built <- as.factor(ifelse(is.na(data$yr_built), NA,
+                                  ifelse(data$yr_built <= 1985, 0,
+                                         ifelse(data$yr_built > 1985 & data$yr_built < 2010, 1, 2))))
 
 
-# matriz = vector(mode="numeric", length=0)
-# for (i in 1:length(data$zipcode)){
-#   for (j in 1:length(data$zipcode)){
-#     if (data$zipcode[i] == data$zipcode[j] & !is.na(data$zipcode[i])){
-#       matriz = c(matriz, 1)
-#     }
-#     else{matriz = c(matriz,0)}
-#   }
-# }
-# 
-# data$zipcode[1] == data$zipcode[118]
+# Data partitioning ----
 
-#TRAINING Y TEST SET----
-
-in_train <- createDataPartition(log(data$price), p = 0.75, list = FALSE)  # 75% for training
-training <- data[ in_train,]
-testing <- data[-in_train,]
-nrow(training)
-nrow(testing)
+spl <- createDataPartition(log(data$price), p = 0.80, list = FALSE)
+HousingTrain <- data[ spl,]
+HousingTest<- data[-spl,]
+dim(HousingTrain)
+dim(HousingTest)
 
 
+# Nuestro objetivo es predecir el precio en función del resto de variables
+
+# Modelos para explicar ----
+expm1(data$price)
+log(data$price+exp(1))
+ModelP <- log(price+exp(1))~sqft_living +sqft_lot + floors + waterfront + view +
+  condition + yr_built + yr_renovated + zipcode + sqft_living15 + grade
+
+ctrl <- trainControl(method = "repeatedcv", 
+                     repeats = 2,
+                     number = 5)
+
+test_results <- data.frame(precio = log(HousingTest$price))
+
+# Lasso regression----
+
+lasso_grid <- expand.grid(fraction = seq(.01, 1, length = 20))
+
+lasso_tune <- train(ModelP, data = HousingTrain,
+                    method='lasso',
+                    preProc=c('scale','center'),
+                    tuneGrid = lasso_grid,
+                    trControl=ctrl)
+
+lasso_tune$bestTune
+test_results$lasso <- predict(lasso_tune, HousingTest)
+postResample(pred = test_results$lasso,  obs = test_results$precio)
+
+
+# Elastic net ----
+elastic_grid = expand.grid(alpha = seq(0, .2, 0.01), lambda = seq(0, .1, 0.01))
+glmnet_tune <- train(ModelP, data = HousingTrain,
+                     method='glmnet',
+                     preProc=c('scale','center'),
+                     tuneGrid = elastic_grid,
+                     trControl=ctrl)
+plot(glmnet_tune)
+glmnet_tune$bestTune
+test_results$glmnet <- predict(glmnet_tune, HousingTest)
+postResample(pred = test_results$glmnet,  obs = test_results$precio)
 
 
 
+
+#### Modificar a partir de aquí
 
 #REGRSION SIMPLE----
 
