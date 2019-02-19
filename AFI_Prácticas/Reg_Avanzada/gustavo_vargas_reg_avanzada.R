@@ -92,9 +92,7 @@ dim(HousingTest)
 # Nuestro objetivo es predecir el precio en función del resto de variables
 
 # Modelos para explicar ----
-expm1(data$price)
-log(data$price+exp(1))
-ModelP <- log(price+exp(1))~sqft_living +sqft_lot + floors + waterfront + view +
+ModelP <- log1p(price)~sqft_living +sqft_lot + floors + waterfront + view +
   condition + yr_built + yr_renovated + zipcode + sqft_living15 + grade
 
 ctrl <- trainControl(method = "repeatedcv", 
